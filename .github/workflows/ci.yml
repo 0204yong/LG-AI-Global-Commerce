@@ -1,0 +1,49 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate HTML structure
+        run: |
+          echo "🔍 Validating HTML files..."
+          if grep -q '<!DOCTYPE html>' index.html; then
+            echo "✅ index.html has valid DOCTYPE"
+          else
+            echo "❌ Missing DOCTYPE" && exit 1
+          fi
+
+      - name: Check required files
+        run: |
+          echo "📁 Checking required files..."
+          for file in index.html style.css script.js manifest.json service-worker.js; do
+            if [ -f "$file" ]; then
+              echo "✅ $file exists"
+            else
+              echo "❌ $file is missing" && exit 1
+            fi
+          done
+
+      - name: Validate JSON files
+        run: |
+          echo "🔍 Validating JSON files..."
+          node -e "JSON.parse(require('fs').readFileSync('manifest.json','utf8')); console.log('✅ manifest.json is valid JSON')"
+          node -e "JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('✅ package.json is valid JSON')"
+          node -e "JSON.parse(require('fs').readFileSync('vercel.json','utf8')); console.log('✅ vercel.json is valid JSON')"
+
+      - name: Report success
+        run: echo "🎉 All checks passed!"

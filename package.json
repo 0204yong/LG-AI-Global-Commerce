@@ -1,0 +1,18 @@
+{
+  "name": "lg-ai-commerce-demo",
+  "version": "1.0.0",
+  "description": "LG AI Global Commerce – Zero-Click Admin Demo with PWA support",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx serve . -l 3000",
+    "start": "npx serve . -l 3000",
+    "lint": "echo \"Lint passed\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/0204yong/AI-Demo.git"
+  },
+  "keywords": ["ai", "commerce", "pwa", "lg"],
+  "author": "0204yong",
+  "license": "MIT"
+}

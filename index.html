@@ -7,6 +7,13 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#a855f7">
+    <meta name="description" content="LG AI Global Commerce – Zero-Click Admin Demo">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
 
@@ -214,5 +221,15 @@
 </div>
 
 <script src="script.js"></script>
+<script>
+  // Register Service Worker for PWA
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(reg => console.log('✅ Service Worker registered:', reg.scope))
+        .catch(err => console.log('❌ SW registration failed:', err));
+    });
+  }
+</script>
 </body>
 </html>

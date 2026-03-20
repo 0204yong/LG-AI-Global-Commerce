@@ -1,3 +1,25 @@
+# Dependencies
+node_modules/
+
+# Vercel
+.vercel/
+
+# Build output
+dist/
+
+# PPT files
 ppt_extracted/
 temp.zip
 *.pptx
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
+*.swo
+
+# Lock files (optional - remove if you want to track)
+.~lock.*
