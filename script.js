@@ -303,7 +303,7 @@ window.togglePane = function(){
 function addMsg(text,isUser=false){
     const d=document.createElement('div');
     d.className=`message ${isUser?'user-message':'ai-message'}`;
-    d.innerHTML=`<div class="avatar"><i class="fa-solid ${isUser?'fa-user':'fa-robot'}"></i></div><div class="bubble">${text}</div>`;
+    d.innerHTML=`<div class="avatar"><i class="fa-solid ${isUser?'fa-user':'fa-sparkles'}"></i></div><div class="bubble">${text}</div>`;
     chatContainer.appendChild(d); chatContainer.scrollTop=chatContainer.scrollHeight;
 }
 window.fillChat = function(txt){ chatInput.value=txt; chatInput.focus(); };
@@ -339,7 +339,7 @@ function processIntent(text){
             <div style="font-size:.6rem;color:#64748b;margin-top:.2rem">예상 전환율 증가 바</div>
         </div>`;
         const aiMsg=document.createElement('div'); aiMsg.className='message ai-message';
-        aiMsg.innerHTML=`<div class="avatar"><i class="fa-solid fa-robot"></i></div>
+        aiMsg.innerHTML=`<div class="avatar"><i class="fa-solid fa-sparkles"></i></div>
         <div class="bubble"><b>✅ Intent: create_coupon()</b>
         <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-terminal"></i> create_coupon</div>
         <div class="ai-card-details">• region: ${region} (${regionName})<br>• target: ${target} (${affectedProducts.length}개 상품)<br>• discount: -${disc}%<br>• auto_localize: true${profitBar}</div>
@@ -363,7 +363,7 @@ function processIntent(text){
         const discM = text.match(/(\d+)%/); const bundleDisc = discM ? parseInt(discM[1]) : 10;
         let region=currentStoreId; if(text.includes('스페인')) region='ES';
         const aiMsg=document.createElement('div'); aiMsg.className='message ai-message';
-        aiMsg.innerHTML=`<div class="avatar"><i class="fa-solid fa-robot"></i></div>
+        aiMsg.innerHTML=`<div class="avatar"><i class="fa-solid fa-sparkles"></i></div>
         <div class="bubble"><b>✅ Intent: create_bundle()</b>
         <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-boxes-stacked"></i> create_bundle</div>
         <div class="ai-card-details">• items: ${bp.map(p=>'<br>  └ '+p.name+' ('+fmt(p.price,L)+')').join('')}<br>• 정가 합계: ${fmt(tot,L)}<br>• 번들가(-${bundleDisc}%): <b>${fmt(tot*(1-bundleDisc/100),L)}</b><br>• 절약: <span style="color:#10b981">${fmt(tot*bundleDisc/100,L)}</span></div>
@@ -391,7 +391,7 @@ function processIntent(text){
         const diff = newPrice - targetProduct.price;
         const pctChange = ((diff/targetProduct.price)*100).toFixed(1);
         const aiMsg=document.createElement('div'); aiMsg.className='message ai-message';
-        aiMsg.innerHTML=`<div class="avatar"><i class="fa-solid fa-robot"></i></div>
+        aiMsg.innerHTML=`<div class="avatar"><i class="fa-solid fa-sparkles"></i></div>
         <div class="bubble"><b>✅ Intent: update_price()</b>
         <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-won-sign"></i> update_price</div>
         <div class="ai-card-details">• product: ${targetProduct.name}<br>• 현재가: ${fmt(targetProduct.price,L)}<br>• 변경가: <b>${fmt(newPrice,L)}</b><br>• 변동: <span style="color:${diff>0?'#10b981':'#ef4444'}">${diff>0?'+':''}${pctChange}% (${diff>0?'+':''}${fmt(Math.abs(diff),L)})</span></div>
@@ -413,7 +413,7 @@ function processIntent(text){
         }
         const L=locales[targetCode];
         const aiMsg=document.createElement('div'); aiMsg.className='message ai-message';
-        aiMsg.innerHTML=`<div class="avatar"><i class="fa-solid fa-robot"></i></div>
+        aiMsg.innerHTML=`<div class="avatar"><i class="fa-solid fa-sparkles"></i></div>
         <div class="bubble"><b>✅ Intent: deploy_country()</b>
         <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-globe"></i> deploy_country</div>
         <div class="ai-card-details">• target: ${L.region}<br>• domain: lg.com/${targetCode.toLowerCase()}<br>• currency: ${L.cur}<br>• language: auto-translate (AI)<br>• products: ${products.filter(p=>!p.bundleItems).length}개 상품 자동 변환<br>• estimated_time: ~30초 (기존 6개월 → AI 자동화)</div>
@@ -427,9 +427,9 @@ function processIntent(text){
     setTimeout(()=>{
         addMsg(`아래 추천 명령어를 사용해 보세요:<br>
         <div class="suggestion-chips" style="margin-top:.5rem">
-            <button class="chip" onclick="fillChat('OLED TV 20% 할인 쿠폰 만들어줘')">🏷️ 할인 쿠폰</button>
-            <button class="chip" onclick="fillChat('OLED TV랑 사운드바 번들 세트 만들어줘')">📦 번들</button>
-            <button class="chip" onclick="fillChat('OLED TV 가격을 350만원으로 바꿰줘')">💰 가격 변경</button>
+            <button class="chip" onclick="fillChat('블랙 프라이데이 다크 템플릿으로 바꿔줘')">🎨 전역 테마 변경</button>
+            <button class="chip" onclick="fillChat('코드제로 무선청소기 신규 등록해줘')">🛍️ 신제품 생성</button>
+            <button class="chip" onclick="fillChat('OLED TV 20% 할인 쿠폰 만들어줘')">🏷️ 할인 쿠폰 배포</button>
             <button class="chip" onclick="fillChat('스페인 사이트 개설해줘')">🌍 국가 롤아웃</button>
         </div>`);
     },500);
@@ -459,7 +459,7 @@ window.execRollout = function(code, btn){
     ];
     let progress = document.createElement('div');
     progress.className='message ai-message';
-    progress.innerHTML=`<div class="avatar"><i class="fa-solid fa-robot"></i></div><div class="bubble"><b>🚀 국가 배포 진행 중...</b><div class="rollout-steps" id="rolloutSteps"></div></div>`;
+    progress.innerHTML=`<div class="avatar"><i class="fa-solid fa-sparkles"></i></div><div class="bubble"><b>🚀 국가 배포 진행 중...</b><div class="rollout-steps" id="rolloutSteps"></div></div>`;
     chatContainer.appendChild(progress);
     chatContainer.scrollTop = chatContainer.scrollHeight;
     const stepsEl = document.getElementById('rolloutSteps');
