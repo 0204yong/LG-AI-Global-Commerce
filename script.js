@@ -490,7 +490,7 @@ window.execTheme = function(themeId, btn){
 };
 
 window.execAddProduct = function(type, price, btn){
-    const newItem = { id:'vac_'+Date.now(), cat:'Appliance', name:'LG 코드제로 오브제컬렉션 A9S', model:'AU9990', price:price, img:'https://www.lge.co.kr/kr/images/vacuum-cleaners/md08595471/gallery/medium01.jpg', desc:'더 강력해진 흡입력과 AI 기반의 스마트 청정 스테이션을 경험하세요.', isNew:true };
+    const newItem = { id:'vac_'+Date.now(), cat:'Appliance', name:'LG 코드제로 오브제컬렉션 A9S', model:'AU9990', price:price, img:'vacuum.jpg', desc:'더 강력해진 흡입력과 AI 기반의 스마트 청정 스테이션을 경험하세요.', isNew:true };
     // placeholder image using washer.png
     products.unshift(newItem);
     btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 제품 등록 완료</span>';
