@@ -309,6 +309,35 @@ function addMsg(text,isUser=false){
 window.fillChat = function(txt){ chatInput.value=txt; chatInput.focus(); };
 
 function processIntent(text){
+    // ---- Intent 0: Theme Change ----
+    if(text.includes('테마') || text.includes('다크') || text.includes('블랙 프라이데이') || text.includes('블랙프라이데이') || text.includes('템플릿')){
+        const aiMsg=document.createElement('div'); aiMsg.className='message ai-message';
+        aiMsg.innerHTML=`<div class="avatar"><i class="fa-solid fa-sparkles"></i></div>
+        <div class="bubble"><b>✅ Intent: change_theme()</b>
+        <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-palette"></i> change_theme</div>
+        <div class="ai-card-details">• theme_id: black_friday<br>• color_mode: dark<br>• accent_color: neon_red<br>• impact: 글로벌 UI 테마 롤아웃 대기중</div>
+        <div style="display:flex;gap:.4rem">
+            <button class="btn btn-approve" onclick="execTheme('black_friday',this)">✓ 승인 (Deploy)</button>
+            <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=\\'color:#ef4444\\'>✗ 취소됨</span>'">✗ 취소</button>
+        </div></div></div>`;
+        chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
+    }
+    // ---- Intent 0.5: Add Product ----
+    if(text.includes('신제품') || text.includes('신규 등록') || text.includes('청소기')){
+        const L=locales[currentStoreId]||locales.KR;
+        const newPrice = 1250000;
+        const aiMsg=document.createElement('div'); aiMsg.className='message ai-message';
+        aiMsg.innerHTML=`<div class="avatar"><i class="fa-solid fa-sparkles"></i></div>
+        <div class="bubble"><b>✅ Intent: add_product()</b>
+        <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-plus-circle"></i> add_product</div>
+        <div class="ai-card-details">• category: Appliance<br>• product_name: LG 코드제로 오브제컬렉션 A9S<br>• price: <b>${fmt(newPrice,L)}</b><br>• status: 즉시 퍼블리싱 대기중</div>
+        <div style="display:flex;gap:.4rem">
+            <button class="btn btn-approve" onclick="execAddProduct('vacuum', ${newPrice}, this)">✓ 승인 (Publish)</button>
+            <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=\\'color:#ef4444\\'>✗ 취소됨</span>'">✗ 취소</button>
+        </div></div></div>`;
+        chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
+    }
+
     // ---- Intent 1: Coupon / Discount ----
     if(text.includes('할인') || text.includes('쿠폰')){
         const m=text.match(/(\d+)%/); const disc=m?parseInt(m[1]):20;
@@ -440,6 +469,34 @@ window.execDiscount = function(region,catFilter,disc,btn){
     products.forEach(p=>{ if(catFilter==='all'||p.cat===catFilter) p.discount=disc; });
     btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> Live 배포 완료</span>';
     addMsg(`✅ <b>배포 완료.</b> 우측 스토어에서 확인하세요!<br>1. 할인 배지 실시간 반영<br>2. 상품 클릭 → 상세에서도 할인 적용`);
+    renderStore(); document.querySelector('.product-section').scrollIntoView({behavior:'smooth'});
+};
+
+// ==================== NEW INTENT EXECS ====================
+window.execTheme = function(themeId, btn){
+    document.body.classList.add('black-friday');
+    document.getElementById('promo1').textContent = 'BLACK FRIDAY SALE';
+    document.getElementById('promo2').textContent = 'UP TO 50% OFF';
+    document.getElementById('promo3').textContent = 'FREE SECURE SHIPPING';
+    // add badge to all products
+    products.forEach(p => { if(!p.discount) p.discount = 15; });
+    // update label
+    document.getElementById('heroLabel').textContent = 'BLACK FRIDAY EXCLUSIVE';
+    document.getElementById('heroTitle').textContent = 'Unbelievable Deals';
+    document.getElementById('heroDesc').textContent = 'Shop the best AI-powered electronics at the lowest prices of the year.';
+    btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 테마 반영 완료</span>';
+    addMsg(`✅ <b>전역 테마 업데이트 완료!</b><br>스토어가 블랙프라이데이 다크모드 및 프로모션 가격으로 자동 세팅되었습니다.`);
+    renderStore(); document.getElementById('storePane').scrollTo({top:0,behavior:'smooth'});
+};
+
+window.execAddProduct = function(type, price, btn){
+    const newItem = { id:'vac_'+Date.now(), cat:'Appliance', name:'LG 코드제로 오브제컬렉션 A9S', model:'AU9990', price:price, img:'washer.png', desc:'더 강력해진 흡입력과 AI 기반의 스마트 청정 스테이션을 경험하세요.', isNew:true };
+    // placeholder image using washer.png
+    products.unshift(newItem);
+    btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 제품 등록 완료</span>';
+    addMsg(`✅ <b>신제품 등록 완료!</b><br>🛍️ LG 코드제로 오브제컬렉션 A9S<br>스토어 상단에 즉시 노출되었습니다.`);
+    activeFilter='all'; document.querySelectorAll('.gnb-link').forEach(l=>l.classList.remove('active'));
+    document.querySelector('[data-cat="all"]').classList.add('active');
     renderStore(); document.querySelector('.product-section').scrollIntoView({behavior:'smooth'});
 };
 
