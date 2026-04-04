@@ -123,7 +123,9 @@ function renderStore(){
                     <div class="bundle-composition">${p.bundleItems.map(bi=>bi.name).join(' + ')}</div>
                     <div class="pc-prices"><span class="pc-price">${displayPrice}</span>${orig}</div>
                     <div class="bundle-savings"><i class="fa-solid fa-tag"></i> ${savings} 절약!</div>
-                    <button class="pc-buy" onclick="event.stopPropagation();addToCart('${p.id}')">${L.buy}</button>
+                    <button class="pc-buy" onclick="event.stopPropagation();addToCart('${p.id}')">
+                        <i class="fa-solid fa-cart-plus"></i> ${L.buy}
+                    </button>
                 </div>
             </div>`;
         } else {
@@ -133,8 +135,12 @@ function renderStore(){
                 <div class="pc-body">
                     <div class="pc-cat">${p.cat}</div>
                     <div class="pc-name">${p.name}</div>
+                    <div style="color:#fbbf24;font-size:0.75rem;margin-bottom:0.5rem;"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i> <span style="color:#777;font-weight:600;margin-left:4px">4.8 (1,284)</span></div>
                     <div class="pc-prices"><span class="pc-price">${displayPrice}</span>${orig}</div>
-                    <button class="pc-buy" onclick="event.stopPropagation();addToCart('${p.id}')">${L.buy}</button>
+                    <div style="font-size:0.7rem;color:var(--success);font-weight:700;margin-bottom:.8rem;"><i class="fa-solid fa-bolt"></i> 무료 당일 배송 (Free Express)</div>
+                    <button class="pc-buy" onclick="event.stopPropagation();addToCart('${p.id}')">
+                        <i class="fa-solid fa-cart-plus"></i> ${L.buy}
+                    </button>
                 </div>
             </div>`;
         }
