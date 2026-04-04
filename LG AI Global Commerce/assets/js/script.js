@@ -827,43 +827,60 @@ let widgetDragOffsetX = 0;
 let widgetDragOffsetY = 0;
 let isWidgetMoved = false;
 
-if(robotContainer && widgetContainer) {
-    robotContainer.addEventListener('mousedown', (e) => {
-        isWidgetDragging = true;
-        isWidgetMoved = false;
-        
-        const rect = widgetContainer.getBoundingClientRect();
-        widgetDragOffsetX = e.clientX - rect.left;
-        widgetDragOffsetY = e.clientY - rect.top;
-        
-        // 제약 해제 후 강제 Fixed 제어
-        widgetContainer.style.bottom = 'auto';
-        widgetContainer.style.right = 'auto';
-        widgetContainer.style.margin = '0';
-        widgetContainer.style.left = rect.left + 'px';
-        widgetContainer.style.top = rect.top + 'px';
-        
-        robotContainer.style.cursor = 'grabbing';
-    });
+function startDrag(e) {
+    if(e.type === 'mousedown') e.preventDefault();
+    isWidgetDragging = true;
+    isWidgetMoved = false;
     
-    document.addEventListener('mousemove', (e) => {
-        if (!isWidgetDragging) return;
-        isWidgetMoved = true;
-        widgetContainer.style.left = (e.clientX - widgetDragOffsetX) + 'px';
-        widgetContainer.style.top = (e.clientY - widgetDragOffsetY) + 'px';
-    });
+    // 마우스/터치 좌표 가져오기
+    const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
     
-    document.addEventListener('mouseup', () => {
-        if (isWidgetDragging) {
-            isWidgetDragging = false;
-            robotContainer.style.cursor = 'pointer';
-            
-            // 드래그가 아니라 단순 클릭이었을 경우 챗봇 창 토글
-            if (!isWidgetMoved) {
-                toggleChat();
-            }
+    const rect = widgetContainer.getBoundingClientRect();
+    widgetDragOffsetX = clientX - rect.left;
+    widgetDragOffsetY = clientY - rect.top;
+    
+    // जे약 해제 후 강제 Fixed 제어
+    widgetContainer.style.bottom = 'auto';
+    widgetContainer.style.right = 'auto';
+    widgetContainer.style.margin = '0';
+    widgetContainer.style.left = rect.left + 'px';
+    widgetContainer.style.top = rect.top + 'px';
+    
+    robotContainer.style.cursor = 'grabbing';
+}
+
+function moveDrag(e) {
+    if (!isWidgetDragging) return;
+    isWidgetMoved = true;
+    const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+    
+    widgetContainer.style.left = (clientX - widgetDragOffsetX) + 'px';
+    widgetContainer.style.top = (clientY - widgetDragOffsetY) + 'px';
+}
+
+function stopDrag() {
+    if (isWidgetDragging) {
+        isWidgetDragging = false;
+        robotContainer.style.cursor = 'pointer';
+        
+        // 드래그가 아니라 단순 클릭(터치)이었을 경우 토글
+        if (!isWidgetMoved) {
+            toggleChat();
         }
-    });
+    }
+}
+
+if(robotContainer && widgetContainer) {
+    robotContainer.addEventListener('mousedown', startDrag, { passive: false });
+    document.addEventListener('mousemove', moveDrag, { passive: false });
+    document.addEventListener('mouseup', stopDrag);
+
+    // 터치 이벤트 지원
+    robotContainer.addEventListener('touchstart', startDrag, { passive: false });
+    document.addEventListener('touchmove', moveDrag, { passive: false });
+    document.addEventListener('touchend', stopDrag);
 }
 
 // 시작 시 캔버스 렌더링 시작
