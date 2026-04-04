@@ -818,42 +818,50 @@ if(atlasUserInput) atlasUserInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') sendMessage();
 });
 
-// --- 드래그 기능 구현 ---
-const chatHeader = document.getElementById('chat-header');
-let isAtlasDragging = false;
-let atlasDragOffsetX = 0;
-let atlasDragOffsetY = 0;
+// --- 위젯(로봇) 드래그 및 클릭 기능 구현 ---
+const widgetContainer = document.getElementById('chat-widget-container');
+const robotContainer = document.getElementById('robot-canvas-container');
 
-if(chatHeader && atlasChatWindow) {
-    chatHeader.addEventListener('mousedown', (e) => {
-        if(e.target.tagName === 'SPAN') return; // 닫기 버튼 클릭 시 무시
+let isWidgetDragging = false;
+let widgetDragOffsetX = 0;
+let widgetDragOffsetY = 0;
+let isWidgetMoved = false;
+
+if(robotContainer && widgetContainer) {
+    robotContainer.addEventListener('mousedown', (e) => {
+        isWidgetDragging = true;
+        isWidgetMoved = false;
         
-        isAtlasDragging = true;
-        const rect = atlasChatWindow.getBoundingClientRect();
-        atlasDragOffsetX = e.clientX - rect.left;
-        atlasDragOffsetY = e.clientY - rect.top;
+        const rect = widgetContainer.getBoundingClientRect();
+        widgetDragOffsetX = e.clientX - rect.left;
+        widgetDragOffsetY = e.clientY - rect.top;
         
-        // Flex/Margin 제약 해제 후 강제 Fixed 변환
-        atlasChatWindow.style.position = 'fixed';
-        atlasChatWindow.style.margin = '0';
-        atlasChatWindow.style.bottom = 'auto';
-        atlasChatWindow.style.right = 'auto';
-        atlasChatWindow.style.left = rect.left + 'px';
-        atlasChatWindow.style.top = rect.top + 'px';
+        // 제약 해제 후 강제 Fixed 제어
+        widgetContainer.style.bottom = 'auto';
+        widgetContainer.style.right = 'auto';
+        widgetContainer.style.margin = '0';
+        widgetContainer.style.left = rect.left + 'px';
+        widgetContainer.style.top = rect.top + 'px';
         
-        chatHeader.style.cursor = 'grabbing';
+        robotContainer.style.cursor = 'grabbing';
     });
     
     document.addEventListener('mousemove', (e) => {
-        if (!isAtlasDragging) return;
-        atlasChatWindow.style.left = (e.clientX - atlasDragOffsetX) + 'px';
-        atlasChatWindow.style.top = (e.clientY - atlasDragOffsetY) + 'px';
+        if (!isWidgetDragging) return;
+        isWidgetMoved = true;
+        widgetContainer.style.left = (e.clientX - widgetDragOffsetX) + 'px';
+        widgetContainer.style.top = (e.clientY - widgetDragOffsetY) + 'px';
     });
     
     document.addEventListener('mouseup', () => {
-        if (isAtlasDragging) {
-            isAtlasDragging = false;
-            chatHeader.style.cursor = 'grab';
+        if (isWidgetDragging) {
+            isWidgetDragging = false;
+            robotContainer.style.cursor = 'pointer';
+            
+            // 드래그가 아니라 단순 클릭이었을 경우 챗봇 창 토글
+            if (!isWidgetMoved) {
+                toggleChat();
+            }
         }
     });
 }
