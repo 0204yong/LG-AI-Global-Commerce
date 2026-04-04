@@ -349,8 +349,8 @@ function processIntent(text){
         const L=locales[currentStoreId]||locales.KR;
         const newPrice = 1250000;
         const aiMsg=document.createElement('div'); aiMsg.className='message ai-message';
-        aiMsg.innerHTML=`${getAgentAvatarHTML('promo')}
-        <div class="bubble"><b>✅ Intent: issue_coupon()</b>
+        aiMsg.innerHTML=`${getAgentAvatarHTML('product')}
+        <div class="bubble"><b>✅ Intent: add_product()</b>
         <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-plus-circle"></i> add_product</div>
         <div class="ai-card-details">• category: Appliance<br>• product_name: LG 코드제로 오브제컬렉션 A9S<br>• price: <b>${fmt(newPrice,L)}</b><br>• status: 즉시 퍼블리싱 대기중</div>
         <div style="display:flex;gap:.4rem">
@@ -390,9 +390,9 @@ function processIntent(text){
             <div style="font-size:.6rem;color:#64748b;margin-top:.2rem">예상 전환율 증가 바</div>
         </div>`;
         const aiMsg=document.createElement('div'); aiMsg.className='message ai-message';
-        aiMsg.innerHTML=`${getAgentAvatarHTML('price')}
+        aiMsg.innerHTML=`${getAgentAvatarHTML('promo')}
         <div class="bubble"><b>✅ Intent: create_coupon()</b>
-        <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-terminal"></i> create_coupon</div>
+        <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-ticket-simple"></i> create_coupon</div>
         <div class="ai-card-details">• region: ${region} (${regionName})<br>• target: ${target} (${affectedProducts.length}개 상품)<br>• discount: -${disc}%<br>• auto_localize: true${profitBar}</div>
         <div style="display:flex;gap:.4rem">
             <button class="btn btn-approve" onclick="execDiscount('${region}','${catFilter}',${disc},this)">✓ 승인 (Deploy)</button>
@@ -414,7 +414,7 @@ function processIntent(text){
         const discM = text.match(/(\d+)%/); const bundleDisc = discM ? parseInt(discM[1]) : 10;
         let region=currentStoreId; if(text.includes('스페인')) region='ES';
         const aiMsg=document.createElement('div'); aiMsg.className='message ai-message';
-        aiMsg.innerHTML=`${getAgentAvatarHTML('product')}
+        aiMsg.innerHTML=`${getAgentAvatarHTML('promo')}
         <div class="bubble"><b>✅ Intent: create_bundle()</b>
         <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-boxes-stacked"></i> create_bundle</div>
         <div class="ai-card-details">• items: ${bp.map(p=>'<br>  └ '+p.name+' ('+fmt(p.price,L)+')').join('')}<br>• 정가 합계: ${fmt(tot,L)}<br>• 번들가(-${bundleDisc}%): <b>${fmt(tot*(1-bundleDisc/100),L)}</b><br>• 절약: <span style="color:#10b981">${fmt(tot*bundleDisc/100,L)}</span></div>
