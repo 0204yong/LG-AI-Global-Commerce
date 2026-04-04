@@ -593,16 +593,6 @@ window.execProductDiscount = function(id, disc, btn, agentId){
     renderStore(); document.querySelector('.product-section').scrollIntoView({behavior:'smooth'});
 };
 
-window.execPrice = function(id, newPrice, btn, agentId){
-    const p = products.find(x => x.id === id);
-    if(p) {
-        p.price = newPrice;
-        p.discount = 0; // reset discount on standard price change
-    }
-    btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 가격 변경 완료</span>';
-    addMsg(`✅ <b>[${p.name}] 가격이 변경되었습니다.</b><br>${fmt(p.price, locales[currentStoreId]||locales.KR)} → <b>${newPrice}</b><br>메인 스토어에 표기되었습니다.`, false, agentId);
-    renderStore(); document.querySelector('.product-section').scrollIntoView({behavior:'smooth'});
-};
 
 // ==================== NEW INTENT EXECS ====================
 window.execTheme = function(themeId, btn, agentId){
@@ -671,18 +661,19 @@ window.execRollout = function(code, btn, agentId){
         }, totalDelay);
     });
 };
-window.execPrice = function(productId, newPrice, btn){
+window.execPrice = function(productId, newPrice, btn, agentId){
     const p = products.find(x=>x.id===productId);
     if(p){
         const L=locales[currentStoreId]||locales.KR;
         const oldPrice = p.price;
         p.price = newPrice;
+        p.discount = 0; // reset discount on standard price change
         btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 가격 변경 완료</span>';
-        addMsg(`✅ <b>${p.name}</b> 가격이 변경되었습니다.<br>${fmt(oldPrice,L)} → <b>${fmt(newPrice,L)}</b><br>🔄 우측 스토어에서 확인하세요!`);
+        addMsg(`✅ <b>${p.name}</b> 가격이 변경되었습니다.<br>${fmt(oldPrice,L)} → <b>${fmt(newPrice,L)}</b><br>🔄 우측 스토어에서 확인하세요!`, false, agentId);
         renderStore(); document.querySelector('.product-section').scrollIntoView({behavior:'smooth'});
     }
 };
-window.execBundle = function(itemIds,discRate,region,btn){
+window.execBundle = function(itemIds,discRate,region,btn,agentId){
     const ids=itemIds.split(',');
     const bp=ids.map(id=>products.find(p=>p.id===id)).filter(Boolean);
     const tot=bp.reduce((s,p)=>s+p.price,0);
@@ -692,7 +683,7 @@ window.execBundle = function(itemIds,discRate,region,btn){
         bundleItems: bundleItems });
     if(region!==currentStoreId) currentStoreId=region;
     btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 번들 등록 완료</span>';
-    addMsg(`✅ <b>번들 상품 생성 완료!</b><br>📦 ${bp.map(p=>p.name).join(' + ')}<br>할인: -${discRate}%`);
+    addMsg(`✅ <b>번들 상품 생성 완료!</b><br>📦 ${bp.map(p=>p.name).join(' + ')}<br>할인: -${discRate}%`, false, agentId);
     activeFilter='all'; document.querySelectorAll('.gnb-link').forEach(l=>l.classList.remove('active'));
     document.querySelector('[data-cat="all"]').classList.add('active');
     renderStore(); document.querySelector('.product-section').scrollIntoView({behavior:'smooth'});
