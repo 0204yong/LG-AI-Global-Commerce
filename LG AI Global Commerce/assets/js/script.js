@@ -477,8 +477,11 @@ function processIntent(text){
     setTimeout(()=>{
         addMsg(`아래 추천 명령어를 사용해 보세요:<br>
         <div class="suggestion-chips" style="margin-top:.5rem">
-            <button class="chip" onclick="fillChat('OLED M4 모델 5000 파운드로 표준 가격 등록해줘')">💰 표준 가격 갱신</button>
             <button class="chip" onclick="fillChat('OLED M4 15% 할인 세팅해줘')">🏷️ 실시간 할인 폭격</button>
+            <button class="chip" onclick="fillChat('OLED M4 모델 5000 파운드로 표준 가격 등록해줘')">💰 표준 가격 등록</button>
+            <button class="chip" onclick="fillChat('OLED TV 20% 할인 쿠폰 만들어줘')">🎫 할인 쿠폰 배포</button>
+            <button class="chip" onclick="fillChat('스페인 사이트 개설해줘')">🌍 국가 롤아웃</button>
+            <button class="chip" onclick="fillChat('코드제로 무선청소기 신규 등록해줘')">🛍️ 신제품 생성</button>
             <button class="chip" onclick="fillChat('블랙 프라이데이 다크 템플릿으로 바꿔줘')">🎨 전역 테마 교체</button>
         </div>`);
     },500);
