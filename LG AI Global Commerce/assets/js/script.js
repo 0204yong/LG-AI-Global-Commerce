@@ -7,49 +7,49 @@ let currentModalProduct = null;
 // Products are loaded from data.js
 
 const locales = {
-    KR: { flag:'🇰🇷', region:'🇰🇷 대한민국', cur:'₩', rate:1,
+    KR: { flag:'🇰🇷', region:'🇰🇷 대한민국', cur:'₩', rate:1700,
         heroLabel:'LG SIGNATURE OLED M4', heroTitle:'모든 순간을 완벽하게.', heroDesc:'세계 최초 무선 올레드, 압도적 화질을 경험하세요.',
         cta:'지금 구매하기', heading:'인기 제품', buy:'장바구니 담기', cartTitle:'장바구니', total:'합계',
         checkout:'결제하기', placeOrder:'주문하기', orderDone:'주문 완료!', orderDesc:'주문이 성공적으로 접수되었습니다.',
         shipping:'배송 정보', payment:'결제 수단', country:'대한민국',
         p1:'무료 배송', p2:'무이자 할부', p3:'30일 반품 보장' },
-    ES: { flag:'🇪🇸', region:'🇪🇸 España', cur:'€', rate:0.00069,
+    ES: { flag:'🇪🇸', region:'🇪🇸 España', cur:'€', rate:1.17,
         heroLabel:'LG SIGNATURE OLED M4', heroTitle:'Perfecto en cada momento.', heroDesc:'El primer OLED inalámbrico del mundo. Vive una calidad de imagen abrumadora.',
         cta:'Comprar Ahora', heading:'Productos Destacados', buy:'Añadir al Carrito', cartTitle:'Carrito', total:'Total',
         checkout:'Pagar', placeOrder:'Realizar Pedido', orderDone:'¡Pedido Confirmado!', orderDesc:'Su pedido ha sido realizado con éxito.',
         shipping:'Datos de Envío', payment:'Método de Pago', country:'España',
         p1:'Envío Gratis', p2:'Financiación sin intereses', p3:'30 días de devolución' },
-    UK: { flag:'🇬🇧', region:'🇬🇧 United Kingdom', cur:'£', rate:0.00057,
+    UK: { flag:'🇬🇧', region:'🇬🇧 United Kingdom', cur:'£', rate:1,
         heroLabel:'LG SIGNATURE OLED M4', heroTitle:'Innovation for a Better Life.', heroDesc:'Discover the world\'s first wireless OLED.',
         cta:'Shop Now', heading:'Trending Products', buy:'Add to Basket', cartTitle:'Shopping Cart', total:'Total',
         checkout:'Checkout', placeOrder:'Place Order', orderDone:'Order Confirmed!', orderDesc:'Your order has been placed successfully.',
         shipping:'Shipping Details', payment:'Payment', country:'United Kingdom',
         p1:'Free Delivery', p2:'Interest-Free Credit', p3:'30-Day Returns' },
-    JP: { flag:'🇯🇵', region:'🇯🇵 日本', cur:'¥', rate:0.11,
+    JP: { flag:'🇯🇵', region:'🇯🇵 日本', cur:'¥', rate:190,
         heroLabel:'LG SIGNATURE OLED M4', heroTitle:'すべての瞬間を完璧に。', heroDesc:'世界初のワイヤレス有機ELテレビ。圧倒的な画質を体験。',
         cta:'今すぐ購入', heading:'人気製品', buy:'カートに入れる', cartTitle:'カート', total:'合計',
         checkout:'お支払い', placeOrder:'注文する', orderDone:'注文確定！', orderDesc:'ご注文を承りました。',
         shipping:'配送情報', payment:'お支払い方法', country:'日本',
         p1:'送料無料', p2:'分割払い対応', p3:'30日間返品可能' },
-    DE: { flag:'🇩🇪', region:'🇩🇪 Deutschland', cur:'€', rate:0.00069,
+    DE: { flag:'🇩🇪', region:'🇩🇪 Deutschland', cur:'€', rate:1.17,
         heroLabel:'LG SIGNATURE OLED M4', heroTitle:'Perfektion in jedem Moment.', heroDesc:'Der weltweit erste kabellose OLED-TV. Erleben Sie überragende Bildqualität.',
         cta:'Jetzt Kaufen', heading:'Beliebte Produkte', buy:'In den Warenkorb', cartTitle:'Warenkorb', total:'Gesamt',
         checkout:'Zur Kasse', placeOrder:'Bestellen', orderDone:'Bestellung Bestätigt!', orderDesc:'Ihre Bestellung wurde erfolgreich aufgegeben.',
         shipping:'Lieferadresse', payment:'Zahlungsmethode', country:'Deutschland',
         p1:'Kostenloser Versand', p2:'Ratenzahlung', p3:'30 Tage Rückgabe' },
-    FR: { flag:'🇫🇷', region:'🇫🇷 France', cur:'€', rate:0.00069,
+    FR: { flag:'🇫🇷', region:'🇫🇷 France', cur:'€', rate:1.17,
         heroLabel:'LG SIGNATURE OLED M4', heroTitle:'La perfection à chaque instant.', heroDesc:'Le premier téléviseur OLED sans fil au monde.',
         cta:'Acheter', heading:'Produits Populaires', buy:'Ajouter au Panier', cartTitle:'Panier', total:'Total',
         checkout:'Paiement', placeOrder:'Commander', orderDone:'Commande Confirmée!', orderDesc:'Votre commande a été passée.',
         shipping:'Adresse de Livraison', payment:'Mode de Paiement', country:'France',
         p1:'Livraison Gratuite', p2:'Paiement en 3x', p3:'Retour sous 30 jours' },
-    BR: { flag:'🇧🇷', region:'🇧🇷 Brasil', cur:'R$', rate:0.0037,
+    BR: { flag:'🇧🇷', region:'🇧🇷 Brasil', cur:'R$', rate:6.4,
         heroLabel:'LG SIGNATURE OLED M4', heroTitle:'Perfeição em cada momento.', heroDesc:'A primeira TV OLED sem fio do mundo.',
         cta:'Comprar Agora', heading:'Produtos em Destaque', buy:'Adicionar ao Carrinho', cartTitle:'Carrinho', total:'Total',
         checkout:'Pagamento', placeOrder:'Finalizar Pedido', orderDone:'Pedido Confirmado!', orderDesc:'Seu pedido foi realizado com sucesso.',
         shipping:'Endereço de Entrega', payment:'Forma de Pagamento', country:'Brasil',
         p1:'Frete Grátis', p2:'Parcelamento sem juros', p3:'30 dias para devolução' },
-    VN: { flag:'🇻🇳', region:'🇻🇳 Việt Nam', cur:'₫', rate:18.5,
+    VN: { flag:'🇻🇳', region:'🇻🇳 Việt Nam', cur:'₫', rate:32000,
         heroLabel:'LG SIGNATURE OLED M4', heroTitle:'Hoàn hảo trong mọi khoảnh khắc.', heroDesc:'TV OLED không dây đầu tiên trên thế giới.',
         cta:'Mua Ngay', heading:'Sản Phẩm Nổi Bật', buy:'Thêm vào giỏ', cartTitle:'Giỏ hàng', total:'Tổng',
         checkout:'Thanh toán', placeOrder:'Đặt hàng', orderDone:'Đặt hàng thành công!', orderDesc:'Đơn hàng của bạn đã được xác nhận.',
@@ -395,33 +395,61 @@ function processIntent(text){
         </div></div></div>`;
         chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
     }
-    // ---- Intent 3: Price Change ----
-    if(text.includes('가격') && (text.includes('바꿔')||text.includes('변경')||text.includes('등록')||text.includes('수정')||text.includes('만원')||text.includes('으로'))){
-        // Find product
+    // ---- Intent 3: Price / Discount Change ----
+    if(text.includes('가격') || text.includes('할인') || text.includes('파운드')){
+        // Find product by keyword
         let targetProduct = null;
-        for(const p of products){ if(text.includes(p.name) || (p.id==='oled_evo' && (text.includes('OLED')||text.includes('올레드'))) || (p.id==='oled_m' && text.includes('SIGNATURE')) || (p.id==='gram' && (text.includes('gram')||text.includes('그램')||text.includes('노트북'))) || (p.id==='soundbar' && text.includes('사운드바')) || (p.id==='washer' && (text.includes('세탁기')||text.includes('트롬'))) || (p.id==='fridge' && (text.includes('냉장고')||text.includes('디오스')))){ targetProduct=p; break; } }
-        // Find new price
+        for(const p of products){
+            let nameParts = p.name.toLowerCase().replace(/lg /g,'').split(' ');
+            if(nameParts.some(part => part.length >= 2 && text.toLowerCase().includes(part))){
+                targetProduct = p; break; 
+            }
+        }
+        
+        let isDiscount = text.includes('%') || text.includes('할인');
         let newPrice = null;
-        const priceM1 = text.match(/(\d+)\s*만\s*원/); if(priceM1) newPrice = parseInt(priceM1[1]) * 10000;
-        const priceM2 = text.match(/(\d{1,3}(,\d{3})+)/); if(!newPrice && priceM2) newPrice = parseInt(priceM2[0].replace(/,/g,''));
-        const priceM3 = text.match(/(\d{5,})/); if(!newPrice && priceM3) newPrice = parseInt(priceM3[1]);
-        if(!targetProduct || !newPrice){
-            addMsg(`가격 변경: 제품명과 새 가격을 명확히 입력해주세요.<br>예: <b>"OLED TV 가격을 350만원으로 바꿔줘"</b>`);
+        let discountPct = null;
+
+        if (isDiscount) {
+            const discM = text.match(/(\d+)%/); 
+            if(discM) discountPct = parseInt(discM[1]);
+        } else {
+            const priceM = text.match(/(\d{2,}(?:,\d{3})*)/); 
+            if(priceM) newPrice = parseInt(priceM[1].replace(/,/g,''));
+        }
+
+        if(!targetProduct || (!newPrice && !discountPct)){
+            addMsg(`가격을 설정할 제품명과 숫자를 명확히 입력해주세요.<br>예: <b>"OLED M4 5000파운드로 표준 가격 등록해줘"</b> 또는 <b>"OLED M4 15% 할인 세팅해줘"</b>`);
             return;
         }
-        const L=locales[currentStoreId]||locales.KR;
-        const diff = newPrice - targetProduct.price;
-        const pctChange = ((diff/targetProduct.price)*100).toFixed(1);
-        const aiMsg=document.createElement('div'); aiMsg.className='message ai-message';
-        aiMsg.innerHTML=`<div class="avatar"><i class="fa-solid fa-sparkles"></i></div>
-        <div class="bubble"><b>✅ Intent: update_price()</b>
-        <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-won-sign"></i> update_price</div>
-        <div class="ai-card-details">• product: ${targetProduct.name}<br>• 현재가: ${fmt(targetProduct.price,L)}<br>• 변경가: <b>${fmt(newPrice,L)}</b><br>• 변동: <span style="color:${diff>0?'#10b981':'#ef4444'}">${diff>0?'+':''}${pctChange}% (${diff>0?'+':''}${fmt(Math.abs(diff),L)})</span></div>
-        <div style="display:flex;gap:.4rem">
-            <button class="btn btn-approve" onclick="execPrice('${targetProduct.id}',${newPrice},this)">✓ 승인 (Deploy)</button>
-            <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=color:#ef4444>✗ 취소됨</span>'">✗ 취소</button>
-        </div></div></div>`;
-        chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
+
+        const L = locales[currentStoreId] || locales.KR;
+
+        if (isDiscount && discountPct) {
+            const aiMsg = document.createElement('div'); aiMsg.className='message ai-message';
+            aiMsg.innerHTML=`<div class="avatar"><i class="fa-solid fa-sparkles"></i></div>
+            <div class="bubble"><b>✅ Intent: update_discount()</b>
+            <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-tag"></i> update_discount</div>
+            <div class="ai-card-details">• product: ${targetProduct.name}<br>• 할인율: <b>${discountPct}%</b><br>• 할인가: <span style="color:#10b981">${fmt(targetProduct.price * (1 - discountPct/100), L)}</span></div>
+            <div style="display:flex;gap:.4rem">
+                <button class="btn btn-approve" onclick="execProductDiscount('${targetProduct.id}',${discountPct},this)">✓ 승인 (Deploy)</button>
+                <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=color:#ef4444>✗ 취소됨</span>'">✗ 취소</button>
+            </div></div></div>`;
+            chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
+        } else if (newPrice) {
+            const diff = newPrice - targetProduct.price;
+            const pctChange = ((diff/targetProduct.price)*100).toFixed(1);
+            const aiMsg = document.createElement('div'); aiMsg.className='message ai-message';
+            aiMsg.innerHTML=`<div class="avatar"><i class="fa-solid fa-sparkles"></i></div>
+            <div class="bubble"><b>✅ Intent: set_standard_price()</b>
+            <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-coins"></i> set_standard_price</div>
+            <div class="ai-card-details">• product: ${targetProduct.name}<br>• 기존가: ${fmt(targetProduct.price, L)}<br>• 신규등록가: <b>${fmt(newPrice, L)}</b><br>• 변동: <span style="color:${diff>0?'#ef4444':'#10b981'}">${diff>0?'+':''}${pctChange}%</span></div>
+            <div style="display:flex;gap:.4rem">
+                <button class="btn btn-approve" onclick="execPrice('${targetProduct.id}',${newPrice},this)">✓ 승인 (Deploy)</button>
+                <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=color:#ef4444>✗ 취소됨</span>'">✗ 취소</button>
+            </div></div></div>`;
+            chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
+        }
     }
     // ---- Intent 4: Country Rollout ----
     if(text.includes('사이트') || text.includes('롤아웃') || text.includes('개설') || text.includes('오픈') || text.includes('진출')){
@@ -449,10 +477,9 @@ function processIntent(text){
     setTimeout(()=>{
         addMsg(`아래 추천 명령어를 사용해 보세요:<br>
         <div class="suggestion-chips" style="margin-top:.5rem">
-            <button class="chip" onclick="fillChat('블랙 프라이데이 다크 템플릿으로 바꿔줘')">🎨 전역 테마 변경</button>
-            <button class="chip" onclick="fillChat('코드제로 무선청소기 신규 등록해줘')">🛍️ 신제품 생성</button>
-            <button class="chip" onclick="fillChat('OLED TV 20% 할인 쿠폰 만들어줘')">🏷️ 할인 쿠폰 배포</button>
-            <button class="chip" onclick="fillChat('스페인 사이트 개설해줘')">🌍 국가 롤아웃</button>
+            <button class="chip" onclick="fillChat('OLED M4 모델 5000 파운드로 표준 가격 등록해줘')">💰 표준 가격 갱신</button>
+            <button class="chip" onclick="fillChat('OLED M4 15% 할인 세팅해줘')">🏷️ 실시간 할인 폭격</button>
+            <button class="chip" onclick="fillChat('블랙 프라이데이 다크 템플릿으로 바꿔줘')">🎨 전역 테마 교체</button>
         </div>`);
     },500);
 }
@@ -462,6 +489,25 @@ window.execDiscount = function(region,catFilter,disc,btn){
     products.forEach(p=>{ if(catFilter==='all'||p.cat===catFilter) p.discount=disc; });
     btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> Live 배포 완료</span>';
     addMsg(`✅ <b>배포 완료.</b> 우측 스토어에서 확인하세요!<br>1. 할인 배지 실시간 반영<br>2. 상품 클릭 → 상세에서도 할인 적용`);
+    renderStore(); document.querySelector('.product-section').scrollIntoView({behavior:'smooth'});
+};
+
+window.execProductDiscount = function(id, disc, btn){
+    const p = products.find(x => x.id === id);
+    if(p) p.discount = disc;
+    btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 실시간 할인 반영 완료</span>';
+    addMsg(`✅ <b>[${p.name}] ${disc}% 할인 적용 완료.</b><br>메인 스토어에 표기되었습니다.`);
+    renderStore(); document.querySelector('.product-section').scrollIntoView({behavior:'smooth'});
+};
+
+window.execPrice = function(id, newPrice, btn){
+    const p = products.find(x => x.id === id);
+    if(p) {
+        p.price = newPrice;
+        p.discount = 0; // reset discount on standard price change
+    }
+    btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 표준 가격 등록 완료</span>';
+    addMsg(`✅ <b>[${p.name}] 표준 가격 업데이트 완료.</b><br>신규 판매가: <b>${newPrice}</b><br>메인 스토어에 표기되었습니다.`);
     renderStore(); document.querySelector('.product-section').scrollIntoView({behavior:'smooth'});
 };
 

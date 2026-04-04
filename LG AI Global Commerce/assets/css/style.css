@@ -1,13 +1,13 @@
 
 :root {
   --admin-bg: #212121; --admin-sidebar: #171717; --admin-border: #333333; --admin-text: #ececec; --admin-muted: #999999;
-  --admin-user-bg: #383838; --admin-ai-bg: #212121; --success: #10b981; --lg-red: #a50034;
+  --admin-user-bg: #383838; --admin-ai-bg: #212121; --success: #10b981; --lg-red: #000000;
   --store-bg: #ffffff; --store-text: #111111; --store-nav-bg: rgba(255,255,255,0.85); --store-border: #eeeeee;
   --store-card-bg: #ffffff; --store-card-hover: rgba(0,0,0,.08); --store-promo-bg: #f7f7f7; --store-footer: #f2f2f2;
 }
 body.black-friday {
   --store-bg: #000000; --store-text: #f8fafc; --store-nav-bg: rgba(0, 0, 0, 0.85); --store-border: #27272a;
-  --store-card-bg: #111111; --store-card-hover: rgba(255,255,255,.1); --lg-red: #f43f5e; --store-promo-bg: #111111; --store-footer: #0a0a0a;
+  --store-card-bg: #111111; --store-card-hover: rgba(255,255,255,.1); --lg-red: #ffffff; --store-promo-bg: #111111; --store-footer: #0a0a0a;
 }
 * {margin:0;padding:0;box-sizing:border-box;font-family:'Inter',-apple-system,sans-serif}
 body {background:var(--admin-bg);color:var(--admin-text);height:100vh;overflow:hidden;transition:background 0.5s ease}
@@ -56,16 +56,16 @@ body {background:var(--admin-bg);color:var(--admin-text);height:100vh;overflow:h
 .cart-badge{position:absolute;top:-8px;right:-10px;background:var(--lg-red);color:#fff;font-size:.6rem;font-weight:800;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:.3s}
 .cart-badge.bump{animation:cartBump .4s ease}
 @keyframes cartBump{0%{transform:scale(1)}50%{transform:scale(1.5)}100%{transform:scale(1)}}
-.hero-section{position:relative;height:85vh;min-height:600px;overflow:hidden;display:flex;align-items:center}
+.hero-section{position:relative;height:380px;overflow:hidden;display:flex;align-items:center}
 .hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;animation:heroZoom 20s ease infinite alternate}
 @keyframes heroZoom{0%{transform:scale(1)}100%{transform:scale(1.05)}}
 .hero-shade{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,.8) 0%,rgba(0,0,0,.2) 60%,transparent 100%)}
-.hero-text{position:relative;z-index:2;padding:0 5rem;color:#fff;max-width:700px}
-.hero-label{font-size:.9rem;font-weight:700;letter-spacing:4px;text-transform:uppercase;margin-bottom:.75rem;color:rgba(255,255,255,.8)}
-.hero-text h1{font-size:4rem;font-weight:900;line-height:1.05;margin-bottom:1.5rem;letter-spacing:-2px;text-shadow:0 10px 30px rgba(0,0,0,.5)}
-.hero-desc{font-size:1.2rem;line-height:1.6;margin-bottom:2.5rem;font-weight:400;opacity:.9;text-shadow:0 5px 15px rgba(0,0,0,.5)}
-.hero-cta{display:inline-block;background:var(--lg-red);color:#fff;text-decoration:none;padding:1.1rem 3rem;border-radius:99px;font-weight:700;font-size:1.1rem;transition:.3s cubic-bezier(.25,.8,.25,1);border:none;cursor:pointer;box-shadow:0 10px 25px rgba(165,0,52,.4)}
-.hero-cta:hover{background:#cc0044;transform:translateY(-3px);box-shadow:0 15px 35px rgba(165,0,52,.5)}
+.hero-text{position:relative;z-index:2;padding:0 4rem;color:#fff;max-width:650px}
+.hero-label{font-size:.8rem;font-weight:700;letter-spacing:4px;text-transform:uppercase;margin-bottom:.5rem;color:rgba(255,255,255,.8)}
+.hero-text h1{font-size:3rem;font-weight:900;line-height:1.05;margin-bottom:1rem;letter-spacing:-2px;text-shadow:0 10px 30px rgba(0,0,0,.5)}
+.hero-desc{font-size:1.1rem;line-height:1.5;margin-bottom:1.8rem;font-weight:400;opacity:.9;text-shadow:0 5px 15px rgba(0,0,0,.5)}
+.hero-cta{display:inline-block;background:var(--lg-red);color:#fff;text-decoration:none;padding:.9rem 2.5rem;border-radius:99px;font-weight:700;font-size:1rem;transition:.3s cubic-bezier(.25,.8,.25,1);border:none;cursor:pointer;box-shadow:0 10px 25px rgba(0,0,0,.3)}
+.hero-cta:hover{background:#333;transform:translateY(-3px);box-shadow:0 15px 35px rgba(0,0,0,.4)}
 .promo-ribbon{display:flex;justify-content:center;gap:3rem;padding:.8rem 2rem;background:var(--store-promo-bg);border-bottom:1px solid var(--store-border);transition:0.5s ease;font-size:12px;color:var(--store-text);font-weight:600}
 .promo-item{display:flex;align-items:center;gap:.4rem}
 .product-section{padding:3rem 2rem 2rem}
