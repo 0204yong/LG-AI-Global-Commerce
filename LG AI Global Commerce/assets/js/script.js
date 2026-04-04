@@ -787,15 +787,15 @@ window.robotSpeakResponse = function(userText) {
 
     if(!foundCommerceResponse) {
         if (userText.includes("안녕")) { 
-            responseText = "안녕하십니까, 인간. 시스템 분석 결과 주변 환경이 매우 쾌적합니다."; 
+            responseText = "안녕하십니까! 고객님의 쇼핑 고민을 해결해 드리는 LG Atlas Robot 입니다."; 
         } else if (userText.includes("움직") || userText.includes("동작")) { 
-            responseText = "제 관절 모터는 HTML5 Canvas 렌더링을 통해 정상 가동 중입니다. 유압 시스템은 안정적입니다."; 
+            responseText = "제 관절 모터는 렌더링을 통해 이상 없이 가동 중입니다. 쇼핑 보조에 최적화되어 있습니다!"; 
         } else if (userText.includes("바빠") || userText.includes("뭐해")) { 
-            responseText = "보스턴 다이내믹스 상부 보고 및 LG전자 스토어 데이터 백업을 수행 중입니다."; 
+            responseText = "고객님께 최고의 상품을 추천하기 위해 스토어 데이터를 동기화하는 중입니다. 무엇을 도와드릴까요?"; 
         } else if (userText.includes("이름") || userText.includes("누구")) { 
-            responseText = "제 식별 코드는 'Atlas' 입니다. 당신의 완벽한 쇼핑 경험을 돕도록 설계되었습니다."; 
+            responseText = "제 식별 코드는 'LG Atlas Robot' 입니다. 인간의 쇼핑을 보조하고 고민을 시원하게 해결해 드리도록 설계되었습니다! 😁"; 
         } else { 
-            responseText = `'${userText}' 명령을 수신했습니다. 현재 프로토타입 상태이므로 구체적인 수행은 어렵습니다. 삐빅-`; 
+            responseText = `'${userText}' 명령을 수신했습니다. 원하시는 내용을 확인하여 쇼핑에 도움을 드리겠습니다. 삐빅-`; 
         }
     }
 
@@ -817,6 +817,46 @@ if(atlasSendBtn) atlasSendBtn.addEventListener('click', sendMessage);
 if(atlasUserInput) atlasUserInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') sendMessage();
 });
+
+// --- 드래그 기능 구현 ---
+const chatHeader = document.getElementById('chat-header');
+let isAtlasDragging = false;
+let atlasDragOffsetX = 0;
+let atlasDragOffsetY = 0;
+
+if(chatHeader && atlasChatWindow) {
+    chatHeader.addEventListener('mousedown', (e) => {
+        if(e.target.tagName === 'SPAN') return; // 닫기 버튼 클릭 시 무시
+        
+        isAtlasDragging = true;
+        const rect = atlasChatWindow.getBoundingClientRect();
+        atlasDragOffsetX = e.clientX - rect.left;
+        atlasDragOffsetY = e.clientY - rect.top;
+        
+        // Flex/Margin 제약 해제 후 강제 Fixed 변환
+        atlasChatWindow.style.position = 'fixed';
+        atlasChatWindow.style.margin = '0';
+        atlasChatWindow.style.bottom = 'auto';
+        atlasChatWindow.style.right = 'auto';
+        atlasChatWindow.style.left = rect.left + 'px';
+        atlasChatWindow.style.top = rect.top + 'px';
+        
+        chatHeader.style.cursor = 'grabbing';
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+        if (!isAtlasDragging) return;
+        atlasChatWindow.style.left = (e.clientX - atlasDragOffsetX) + 'px';
+        atlasChatWindow.style.top = (e.clientY - atlasDragOffsetY) + 'px';
+    });
+    
+    document.addEventListener('mouseup', () => {
+        if (isAtlasDragging) {
+            isAtlasDragging = false;
+            chatHeader.style.cursor = 'grab';
+        }
+    });
+}
 
 // 시작 시 캔버스 렌더링 시작
 if(atlasCanvas) drawAtlas();
