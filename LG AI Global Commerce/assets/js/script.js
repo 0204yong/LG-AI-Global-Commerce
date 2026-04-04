@@ -303,8 +303,13 @@ function addMsg(text, isUser=false, customAvatarUrl=null) {
     if(isUser) {
         avatarHTML = `<div class="avatar"><i class="fa-solid fa-user"></i></div>`;
     } else {
-        const renderUrl = customAvatarUrl || currentAgentIconUrl || 'assets/images/agents/atlas_agent.png';
-        avatarHTML = `<div class="avatar" style="background:transparent; padding:0; overflow:hidden;"><img src="${renderUrl}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;"></div>`;
+        const renderUrl = customAvatarUrl || currentAgentIconUrl;
+        if (renderUrl) {
+            avatarHTML = `<div class="avatar" style="background:transparent; padding:0; overflow:hidden;"><img src="${renderUrl}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;"></div>`;
+        } else {
+            // Default to Atlas Robot icon
+            avatarHTML = `<div class="avatar atlas-anim" style="color:white; font-size:2rem;"><i class="fa-solid fa-robot"></i></div>`;
+        }
     }
     
     d.innerHTML=`${avatarHTML}<div class="bubble">${text}</div>`;
@@ -314,7 +319,7 @@ window.fillChat = function(txt){ chatInput.value=txt; chatInput.focus(); };
 
 function getAgentAvatarHTML(agentId) {
     let url = '';
-    if(agentId === 'atlas') url = 'assets/images/agents/atlas_agent.png';
+    if(agentId === 'atlas') return `<div class="avatar atlas-anim" style="color:white; font-size:2rem;"><i class="fa-solid fa-robot"></i></div>`;
     else if(agentId === 'product') url = 'assets/images/agents/product_agent_v6.png';
     else if(agentId === 'md') url = 'assets/images/agents/md_agent_v6.png';
     else if(agentId === 'promo') url = 'assets/images/agents/promo_agent.png';
@@ -545,7 +550,7 @@ window.switchAgent = function(id, el) {
         `;
     }
 
-    if(id==='atlas') { currentAgentIconUrl = 'assets/images/agents/atlas_agent.png'; }
+    if(id==='atlas') { currentAgentIconUrl = ''; }
     else { currentAgentIconUrl = document.getElementById('avatar_'+id)?.src || ''; }
 
     addMsg(`🤖 <b>[${nameMap[id]}] 활성화됨.</b><br>해당 분야에 대한 자연어 명령을 대기 중입니다.<br>
