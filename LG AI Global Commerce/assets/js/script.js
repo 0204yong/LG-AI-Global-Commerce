@@ -1,23 +1,10 @@
 // ==================== DATA ====================
-let currentStoreId = 'KR';
+let currentStoreId = 'UK';
 let activeFilter = 'all';
 let cart = [];
 let currentModalProduct = null;
 
-let products = [
-    { id:'oled_m', cat:'TV', name:'LG SIGNATURE OLED M4', model:'OLED97M4', price:25000000, img:'assets/images/products/tv1.png',
-      desc:'세계 최초 무선 올레드 TV. 97인치의 경이로움을 별도의 연결 없이 즐기세요.' },
-    { id:'oled_evo', cat:'TV', name:'LG OLED evo G4', model:'OLED65G4', price:4200000, img:'assets/images/products/tv2.png',
-      desc:'밝기 업그레이드의 정점. MLA 기술로 한층 밝고 선명한 화질을 경험하세요.' },
-    { id:'soundbar', cat:'AV', name:'LG Soundbar S95TR', model:'S95TR', price:1700000, img:'assets/images/products/soundbar.png',
-      desc:'돌비 애트모스 9.1.5ch 프리미엄 사운드바. 극장 그 이상의 몰입감.' },
-    { id:'fridge', cat:'Appliance', name:'LG 디오스 오브제컬렉션', model:'M874AAA452S', price:3200000, img:'assets/images/products/fridge.png',
-      desc:'공간에 맞춰 선택하는 컬러와 소재. 나만의 주방을 완성하세요.' },
-    { id:'washer', cat:'Appliance', name:'LG 트롬 세탁건조기', model:'FX25ESER', price:2800000, img:'assets/images/products/washer.png',
-      desc:'세탁부터 건조까지 한 번에. AI가 최적의 코스를 자동 설정합니다.' },
-    { id:'gram', cat:'Computing', name:'LG gram Pro 16', model:'16Z90SP', price:2390000, img:'assets/images/products/laptop.png',
-      desc:'1,199g 초경량 16인치. Intel Core Ultra 프로세서로 AI 성능까지.' }
-];
+// Products are loaded from data.js
 
 const locales = {
     KR: { flag:'🇰🇷', region:'🇰🇷 대한민국', cur:'₩', rate:1,

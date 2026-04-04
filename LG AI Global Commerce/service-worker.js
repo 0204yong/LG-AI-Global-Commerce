@@ -1,10 +1,11 @@
 // ==================== SERVICE WORKER ====================
-const CACHE_NAME = 'lg-ai-commerce-v8';
+const CACHE_NAME = 'lg-ai-commerce-v9';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/style.css?v=8',
-  '/script.js?v=9',
+  '/data.js?v=1',
+  '/script.js?v=10',
   '/manifest.json',
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
