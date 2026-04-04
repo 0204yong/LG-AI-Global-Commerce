@@ -994,5 +994,34 @@ document.querySelectorAll('.pay-option').forEach(opt=>{
     });
 });
 
+// ==================== ADMIN PANE RESIZER ====================
+const resizer = document.getElementById('dragResizer');
+const adminPane = document.getElementById('adminPane');
+let isResizing = false;
+
+if(resizer && adminPane) {
+    resizer.addEventListener('mousedown', function(e) {
+        isResizing = true;
+        document.body.style.cursor = 'ew-resize';
+        document.documentElement.style.userSelect = 'none'; // Prevent text selection
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        if (!isResizing) return;
+        let newWidth = e.clientX;
+        if (newWidth < 260) newWidth = 260; // min width
+        if (newWidth > window.innerWidth * 0.6) newWidth = window.innerWidth * 0.6; // max 60% of screen
+        adminPane.style.width = newWidth + 'px';
+    });
+
+    document.addEventListener('mouseup', function(e) {
+        if (isResizing) {
+            isResizing = false;
+            document.body.style.cursor = '';
+            document.documentElement.style.userSelect = '';
+        }
+    });
+}
+
 // ==================== INIT ====================
 renderStore();
