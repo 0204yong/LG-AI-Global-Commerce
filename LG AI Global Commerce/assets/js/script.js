@@ -774,41 +774,45 @@ window.sendMessage = function() {
     }, 600);
 };
 
-window.robotSpeakResponse = function(userText) {
+window.robotSpeakResponse = async function(userText) {
     isSpeaking = true;
-    let responseText = "";
-    let foundCommerceResponse = false;
-    for(const [key, resp] of Object.entries(csResponses)){
-        if(userText.includes(key)){ 
-            responseText = resp + " 삐빅- 추가 지원이 필요합니까?"; 
-            foundCommerceResponse = true; break; 
-        }
-    }
 
-    if(!foundCommerceResponse) {
-        if (userText.includes("안녕")) { 
-            responseText = "안녕하십니까! 고객님의 쇼핑 고민을 해결해 드리는 LG Atlas Robot 입니다."; 
-        } else if (userText.includes("움직") || userText.includes("동작")) { 
-            responseText = "제 관절 모터는 렌더링을 통해 이상 없이 가동 중입니다. 쇼핑 보조에 최적화되어 있습니다!"; 
-        } else if (userText.includes("바빠") || userText.includes("뭐해")) { 
-            responseText = "고객님께 최고의 상품을 추천하기 위해 스토어 데이터를 동기화하는 중입니다. 무엇을 도와드릴까요?"; 
-        } else if (userText.includes("이름") || userText.includes("누구")) { 
-            responseText = "제 식별 코드는 'LG Atlas Robot' 입니다. 인간의 쇼핑을 보조하고 고민을 시원하게 해결해 드리도록 설계되었습니다! 😁"; 
-        } else { 
-            responseText = `'${userText}' 명령을 수신했습니다. 원하시는 내용을 확인하여 쇼핑에 도움을 드리겠습니다. 삐빅-`; 
-        }
-    }
+    const loadingId = 'loading-' + Date.now();
+    appendAtlasMessage('💬 생각 중...', 'bot-msg', loadingId);
 
-    appendAtlasMessage(responseText, 'bot-msg');
-    const speakTime = Math.min(responseText.length * 70, 5000); 
-    setTimeout(() => { isSpeaking = false; }, speakTime);
+    try {
+        const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: userText })
+        });
+        const data = await res.json();
+        
+        const loadingEl = document.getElementById(loadingId);
+        if(loadingEl) loadingEl.remove();
+
+        const responseText = data.reply || "통신 모듈 불안정. 잠시 후 삐빅- 다시 시도해주세요.";
+        appendAtlasMessage(responseText, 'bot-msg');
+        
+        const speakTime = Math.min(responseText.length * 70, 5000); 
+        setTimeout(() => { isSpeaking = false; }, speakTime);
+    } catch (error) {
+        console.error("API Error:", error);
+        
+        const loadingEl = document.getElementById(loadingId);
+        if(loadingEl) loadingEl.remove();
+
+        appendAtlasMessage("앗, 서버 통신 지연이 발생했습니다. 다시 말씀해주시겠어요?", 'bot-msg');
+        isSpeaking = false;
+    }
 };
 
-function appendAtlasMessage(text, className) {
+function appendAtlasMessage(text, className, id = null) {
     if(!atlasChatBox) return;
     const msgDiv = document.createElement('div');
     msgDiv.className = `msg ${className}`;
     msgDiv.innerText = text;
+    if(id) msgDiv.id = id;
     atlasChatBox.appendChild(msgDiv);
     atlasChatBox.scrollTo({ top: atlasChatBox.scrollHeight, behavior: 'smooth' });
 }
