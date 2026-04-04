@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LG AI Global Commerce – Zero-Click Admin Demo</title>
-    <link rel="stylesheet" href="assets/css/style.css?v=18">
+    <link rel="stylesheet" href="assets/css/style.css?v=20">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- PWA -->
@@ -31,7 +31,7 @@
         </div>
         <div class="agent-dashboard">
             <div class="agent-item active" onclick="switchAgent('atlas', this)" title="Atlas (Chief AI)">
-                <div class="agent-avatar atlas-anim"><i class="fa-solid fa-robot"></i></div>
+                <div class="agent-avatar atlas-anim"><img src="assets/images/agents/atlas_agent.png" id="avatar_atlas"></div>
                 <span>Atlas</span>
             </div>
             <div class="agent-item" onclick="switchAgent('promo', this)" title="프로모션">
@@ -43,7 +43,7 @@
                 <span>Price</span>
             </div>
             <div class="agent-item" onclick="switchAgent('product', this)" title="제품">
-                <div class="agent-avatar"><img src="assets/images/agents/product_agent_v4.png" id="avatar_product"></div>
+                <div class="agent-avatar"><img src="assets/images/agents/product_agent_v6.png" id="avatar_product"></div>
                 <span>Product</span>
             </div>
             <div class="agent-item" onclick="switchAgent('site', this)" title="사이트">
@@ -51,7 +51,7 @@
                 <span>Site</span>
             </div>
             <div class="agent-item" onclick="switchAgent('md', this)" title="MD">
-                <div class="agent-avatar"><img src="assets/images/agents/md_agent_v4.png" id="avatar_md"></div>
+                <div class="agent-avatar"><img src="assets/images/agents/md_agent_v6.png" id="avatar_md"></div>
                 <span>MD</span>
             </div>
             <div class="agent-item" onclick="switchAgent('marketing', this)" title="마케팅">
@@ -252,8 +252,8 @@
     </div>
 </div>
 
-<script src="assets/js/data.js?v=5"></script>
-<script src="assets/js/script.js?v=16"></script>
+<script src="assets/js/data.js?v=6"></script>
+<script src="assets/js/script.js?v=18"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 <script>
   // Register Service Worker for PWA

@@ -303,12 +303,8 @@ function addMsg(text, isUser=false, customAvatarUrl=null) {
     if(isUser) {
         avatarHTML = `<div class="avatar"><i class="fa-solid fa-user"></i></div>`;
     } else {
-        const renderUrl = customAvatarUrl || currentAgentIconUrl;
-        if(renderUrl) {
-            avatarHTML = `<div class="avatar" style="background:transparent; padding:0; overflow:hidden;"><img src="${renderUrl}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;"></div>`;
-        } else {
-            avatarHTML = `<div class="avatar"><i class="fa-solid fa-sparkles"></i></div>`;
-        }
+        const renderUrl = customAvatarUrl || currentAgentIconUrl || 'assets/images/agents/atlas_agent.png';
+        avatarHTML = `<div class="avatar" style="background:transparent; padding:0; overflow:hidden;"><img src="${renderUrl}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;"></div>`;
     }
     
     d.innerHTML=`${avatarHTML}<div class="bubble">${text}</div>`;
@@ -316,13 +312,25 @@ function addMsg(text, isUser=false, customAvatarUrl=null) {
 }
 window.fillChat = function(txt){ chatInput.value=txt; chatInput.focus(); };
 
+function getAgentAvatarHTML(agentId) {
+    let url = '';
+    if(agentId === 'atlas') url = 'assets/images/agents/atlas_agent.png';
+    else if(agentId === 'product') url = 'assets/images/agents/product_agent_v6.png';
+    else if(agentId === 'md') url = 'assets/images/agents/md_agent_v6.png';
+    else if(agentId === 'promo') url = 'assets/images/agents/promo_agent.png';
+    else if(agentId === 'price') url = 'assets/images/agents/price_agent.png';
+    else if(agentId === 'site') url = 'assets/images/agents/site_agent.png';
+    else url = 'assets/images/agents/' + agentId + '_agent.png';
+    return `<div class="avatar" style="background:transparent; padding:0; overflow:hidden;"><img src="${url}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;"></div>`;
+}
+
 function processIntent(text){
-    let avHTML = currentAgentIconUrl ? `<div class="avatar" style="background:transparent; padding:0; overflow:hidden;"><img src="${currentAgentIconUrl}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;"></div>` : `<div class="avatar"><i class="fa-solid fa-sparkles"></i></div>`;
+    let fallbackAvHTML = currentAgentIconUrl ? `<div class="avatar" style="background:transparent; padding:0; overflow:hidden;"><img src="${currentAgentIconUrl}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;"></div>` : getAgentAvatarHTML('atlas');
 
     // ---- Intent 0: Theme Change ----
     if(text.includes('테마') || text.includes('다크') || text.includes('블랙 프라이데이') || text.includes('블랙프라이데이') || text.includes('템플릿')){
         const aiMsg=document.createElement('div'); aiMsg.className='message ai-message';
-        aiMsg.innerHTML=`${avHTML}
+        aiMsg.innerHTML=`${getAgentAvatarHTML('site')}
         <div class="bubble"><b>✅ Intent: change_theme()</b>
         <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-palette"></i> change_theme</div>
         <div class="ai-card-details">• theme_id: black_friday<br>• color_mode: dark<br>• accent_color: neon_red<br>• impact: 글로벌 UI 테마 롤아웃 대기중</div>
@@ -337,8 +345,8 @@ function processIntent(text){
         const L=locales[currentStoreId]||locales.KR;
         const newPrice = 1250000;
         const aiMsg=document.createElement('div'); aiMsg.className='message ai-message';
-        aiMsg.innerHTML=`${avHTML}
-        <div class="bubble"><b>✅ Intent: add_product()</b>
+        aiMsg.innerHTML=`${getAgentAvatarHTML('promo')}
+        <div class="bubble"><b>✅ Intent: issue_coupon()</b>
         <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-plus-circle"></i> add_product</div>
         <div class="ai-card-details">• category: Appliance<br>• product_name: LG 코드제로 오브제컬렉션 A9S<br>• price: <b>${fmt(newPrice,L)}</b><br>• status: 즉시 퍼블리싱 대기중</div>
         <div style="display:flex;gap:.4rem">
@@ -378,7 +386,7 @@ function processIntent(text){
             <div style="font-size:.6rem;color:#64748b;margin-top:.2rem">예상 전환율 증가 바</div>
         </div>`;
         const aiMsg=document.createElement('div'); aiMsg.className='message ai-message';
-        aiMsg.innerHTML=`<div class="avatar"><i class="fa-solid fa-sparkles"></i></div>
+        aiMsg.innerHTML=`${getAgentAvatarHTML('price')}
         <div class="bubble"><b>✅ Intent: create_coupon()</b>
         <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-terminal"></i> create_coupon</div>
         <div class="ai-card-details">• region: ${region} (${regionName})<br>• target: ${target} (${affectedProducts.length}개 상품)<br>• discount: -${disc}%<br>• auto_localize: true${profitBar}</div>
@@ -402,7 +410,7 @@ function processIntent(text){
         const discM = text.match(/(\d+)%/); const bundleDisc = discM ? parseInt(discM[1]) : 10;
         let region=currentStoreId; if(text.includes('스페인')) region='ES';
         const aiMsg=document.createElement('div'); aiMsg.className='message ai-message';
-        aiMsg.innerHTML=`${avHTML}
+        aiMsg.innerHTML=`${getAgentAvatarHTML('product')}
         <div class="bubble"><b>✅ Intent: create_bundle()</b>
         <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-boxes-stacked"></i> create_bundle</div>
         <div class="ai-card-details">• items: ${bp.map(p=>'<br>  └ '+p.name+' ('+fmt(p.price,L)+')').join('')}<br>• 정가 합계: ${fmt(tot,L)}<br>• 번들가(-${bundleDisc}%): <b>${fmt(tot*(1-bundleDisc/100),L)}</b><br>• 절약: <span style="color:#10b981">${fmt(tot*bundleDisc/100,L)}</span></div>
@@ -444,7 +452,7 @@ function processIntent(text){
 
         if (isDiscount && discountPct) {
             const aiMsg = document.createElement('div'); aiMsg.className='message ai-message';
-            aiMsg.innerHTML=`${avHTML}
+            aiMsg.innerHTML=`${getAgentAvatarHTML('price')}
             <div class="bubble"><b>✅ Intent: update_discount()</b>
             <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-tag"></i> update_discount</div>
             <div class="ai-card-details">• product: ${targetProduct.name}<br>• 할인율: <b>${discountPct}%</b><br>• 할인가: <span style="color:#10b981">${fmt(targetProduct.price * (1 - discountPct/100), L)}</span></div>
@@ -457,7 +465,7 @@ function processIntent(text){
             const diff = newPrice - targetProduct.price;
             const pctChange = ((diff/targetProduct.price)*100).toFixed(1);
             const aiMsg = document.createElement('div'); aiMsg.className='message ai-message';
-            aiMsg.innerHTML=`${avHTML}
+            aiMsg.innerHTML=`${getAgentAvatarHTML('price')}
             <div class="bubble"><b>✅ Intent: set_standard_price()</b>
             <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-coins"></i> set_standard_price</div>
             <div class="ai-card-details">• product: ${targetProduct.name}<br>• 기존가: ${fmt(targetProduct.price, L)}<br>• 신규등록가: <b>${fmt(newPrice, L)}</b><br>• 변동: <span style="color:${diff>0?'#ef4444':'#10b981'}">${diff>0?'+':''}${pctChange}%</span></div>
@@ -480,7 +488,7 @@ function processIntent(text){
         }
         const L=locales[targetCode];
         const aiMsg=document.createElement('div'); aiMsg.className='message ai-message';
-        aiMsg.innerHTML=`${avHTML}
+        aiMsg.innerHTML=`${getAgentAvatarHTML('site')}
         <div class="bubble"><b>✅ Intent: deploy_country()</b>
         <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-globe"></i> deploy_country</div>
         <div class="ai-card-details">• target: ${L.region}<br>• domain: lg.com/${targetCode.toLowerCase()}<br>• currency: ${L.cur}<br>• language: auto-translate (AI)<br>• products: ${products.filter(p=>!p.bundleItems).length}개 상품 자동 변환<br>• estimated_time: ~30초 (기존 6개월 → AI 자동화)</div>
@@ -537,7 +545,7 @@ window.switchAgent = function(id, el) {
         `;
     }
 
-    if(id==='atlas') { currentAgentIconUrl = ''; }
+    if(id==='atlas') { currentAgentIconUrl = 'assets/images/agents/atlas_agent.png'; }
     else { currentAgentIconUrl = document.getElementById('avatar_'+id)?.src || ''; }
 
     addMsg(`🤖 <b>[${nameMap[id]}] 활성화됨.</b><br>해당 분야에 대한 자연어 명령을 대기 중입니다.<br>
