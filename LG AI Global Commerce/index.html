@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LG AI Global Commerce – Zero-Click Admin Demo</title>
-    <link rel="stylesheet" href="style.css?v=5">
+    <link rel="stylesheet" href="assets/css/style.css?v=5">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- PWA -->
@@ -81,7 +81,7 @@
 
         <!-- HERO -->
         <section class="hero-section">
-            <div class="hero-bg" style="background-image:url('hero.png')"></div>
+            <div class="hero-bg" style="background-image:url('assets/images/common/hero.png')"></div>
             <div class="hero-shade"></div>
             <div class="hero-text">
                 <p class="hero-label" id="heroLabel">LG SIGNATURE OLED M4</p>
@@ -202,25 +202,27 @@
     </div>
 </div>
 
-<!-- CS CHATBOT (Customer-facing) -->
-<div class="cs-fab" id="csFab" onclick="toggleCsChat()">
-    <i class="fa-solid fa-headset"></i>
-</div>
-<div class="cs-chat-window" id="csChatWindow">
-    <div class="cs-chat-header">
-        <span><i class="fa-solid fa-headset"></i> LG Customer Support</span>
-        <button onclick="toggleCsChat()" style="background:none;border:none;color:#fff;font-size:1.1rem;cursor:pointer"><i class="fa-solid fa-xmark"></i></button>
+<!-- ATLAS CHATBOT WIDGET -->
+<div id="chat-widget-container">
+    <div id="chat-window">
+        <div class="chat-header">
+            <div>Atlas AI <span class="header-status">● Online</span></div>
+            <span style="cursor:pointer; font-size: 20px; color: #888; transition: color 0.2s;" onclick="toggleChat()" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'">✕</span>
+        </div>
+        <div class="chat-messages" id="chat-box">
+            <div class="msg bot-msg">시스템 가동. 안녕하십니까, 인간. 쇼핑 보조가 가능한 보스턴 다이내믹스 아틀라스 프로토타입입니다. 무엇을 지원할까요?</div>
+        </div>
+        <div class="chat-input" id="atlas-chat-input-wrapper">
+            <input type="text" id="user-input" placeholder="명령을 입력하십시오..." autocomplete="off">
+            <button id="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
     </div>
-    <div class="cs-chat-messages" id="csChatMessages">
-        <div class="cs-msg cs-bot"><div class="cs-bubble">안녕하세요! LG전자 AI 고객센터입니다. 😊<br>제품 문의, 배송 확인, 반품/교환 등 무엇이든 물어보세요!</div></div>
-    </div>
-    <div class="cs-chat-input">
-        <input type="text" id="csInput" placeholder="무엇이든 물어보세요..." autocomplete="off">
-        <button onclick="sendCsMsg()"><i class="fa-solid fa-paper-plane"></i></button>
+    <div id="robot-canvas-container" onclick="toggleChat()">
+        <canvas id="atlasCanvas" width="140" height="170"></canvas>
     </div>
 </div>
 
-<script src="script.js?v=5"></script>
+<script src="assets/js/script.js?v=5"></script>
 <script>
   // Register Service Worker for PWA
   if ('serviceWorker' in navigator) {

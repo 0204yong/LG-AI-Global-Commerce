@@ -1,6 +1,6 @@
 {
   "buildCommand": null,
-  "outputDirectory": ".",
+  "outputDirectory": "LG AI Global Commerce",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ],

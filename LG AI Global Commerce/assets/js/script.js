@@ -5,17 +5,17 @@ let cart = [];
 let currentModalProduct = null;
 
 let products = [
-    { id:'oled_m', cat:'TV', name:'LG SIGNATURE OLED M4', model:'OLED97M4', price:25000000, img:'tv1.png',
+    { id:'oled_m', cat:'TV', name:'LG SIGNATURE OLED M4', model:'OLED97M4', price:25000000, img:'assets/images/products/tv1.png',
       desc:'세계 최초 무선 올레드 TV. 97인치의 경이로움을 별도의 연결 없이 즐기세요.' },
-    { id:'oled_evo', cat:'TV', name:'LG OLED evo G4', model:'OLED65G4', price:4200000, img:'tv2.png',
+    { id:'oled_evo', cat:'TV', name:'LG OLED evo G4', model:'OLED65G4', price:4200000, img:'assets/images/products/tv2.png',
       desc:'밝기 업그레이드의 정점. MLA 기술로 한층 밝고 선명한 화질을 경험하세요.' },
-    { id:'soundbar', cat:'AV', name:'LG Soundbar S95TR', model:'S95TR', price:1700000, img:'soundbar.png',
+    { id:'soundbar', cat:'AV', name:'LG Soundbar S95TR', model:'S95TR', price:1700000, img:'assets/images/products/soundbar.png',
       desc:'돌비 애트모스 9.1.5ch 프리미엄 사운드바. 극장 그 이상의 몰입감.' },
-    { id:'fridge', cat:'Appliance', name:'LG 디오스 오브제컬렉션', model:'M874AAA452S', price:3200000, img:'fridge.png',
+    { id:'fridge', cat:'Appliance', name:'LG 디오스 오브제컬렉션', model:'M874AAA452S', price:3200000, img:'assets/images/products/fridge.png',
       desc:'공간에 맞춰 선택하는 컬러와 소재. 나만의 주방을 완성하세요.' },
-    { id:'washer', cat:'Appliance', name:'LG 트롬 세탁건조기', model:'FX25ESER', price:2800000, img:'washer.png',
+    { id:'washer', cat:'Appliance', name:'LG 트롬 세탁건조기', model:'FX25ESER', price:2800000, img:'assets/images/products/washer.png',
       desc:'세탁부터 건조까지 한 번에. AI가 최적의 코스를 자동 설정합니다.' },
-    { id:'gram', cat:'Computing', name:'LG gram Pro 16', model:'16Z90SP', price:2390000, img:'laptop.png',
+    { id:'gram', cat:'Computing', name:'LG gram Pro 16', model:'16Z90SP', price:2390000, img:'assets/images/products/laptop.png',
       desc:'1,199g 초경량 16인치. Intel Core Ultra 프로세서로 AI 성능까지.' }
 ];
 
@@ -490,7 +490,7 @@ window.execTheme = function(themeId, btn){
 };
 
 window.execAddProduct = function(type, price, btn){
-    const newItem = { id:'vac_'+Date.now(), cat:'Appliance', name:'LG 코드제로 오브제컬렉션 A9S', model:'AU9990', price:price, img:'vacuum.jpg', desc:'더 강력해진 흡입력과 AI 기반의 스마트 청정 스테이션을 경험하세요.', isNew:true };
+    const newItem = { id:'vac_'+Date.now(), cat:'Appliance', name:'LG 코드제로 오브제컬렉션 A9S', model:'AU9990', price:price, img:'assets/images/products/vacuum.jpg', desc:'더 강력해진 흡입력과 AI 기반의 스마트 청정 스테이션을 경험하세요.', isNew:true };
     // placeholder image using washer.png
     products.unshift(newItem);
     btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 제품 등록 완료</span>';
@@ -569,43 +569,257 @@ window.execBundle = function(itemIds,discRate,region,btn){
 sendBtn.addEventListener('click',()=>{ const v=chatInput.value.trim(); if(!v) return; addMsg(v,true); chatInput.value=''; setTimeout(()=>processIntent(v),600); });
 chatInput.addEventListener('keypress',e=>{ if(e.key==='Enter') sendBtn.click(); });
 
-// ==================== CS CHATBOT ====================
+// ==================== ATLAS CHATBOT ====================
 const csResponses = {
-    '배송': '일반적으로 주문 후 2~3 영업일 내에 배송됩니다. 대형 가전(TV, 냉장고 등)은 설치 배송으로 별도 일정이 잡힙니다. 주문번호를 알려주시면 실시간 추적도 도와드릴게요!',
-    '반품': '제품 수령 후 30일 이내에 반품이 가능합니다. 포장을 개봉하지 않은 상태가 가장 좋으며, 개봉 후에도 제품 하자 시 무상 교환/반품 처리해 드립니다.',
-    '교환': '제품에 하자가 있는 경우, 제조일로부터 1년 이내 무상 교환이 가능합니다. 고객센터(1544-7777)로 연락 주시거나 여기서 바로 접수하실 수 있습니다.',
+    '배송': '일반적으로 주문 후 2~3 영업일 내에 배송됩니다. 대형 가전(TV, 냉장고 등)은 설치 배송으로 별도 일정이 잡힙니다.',
+    '반품': '제품 수령 후 30일 이내에 반품이 가능합니다. 개봉 후에도 제품 하자 시 무상 교환/반품 처리해 드립니다.',
+    '교환': '제품에 하자가 있는 경우, 제조일로부터 1년 이내 무상 교환이 가능합니다.',
     '환불': '결제 취소 및 환불은 반품 접수 후 영업일 기준 3~5일 내에 원래 결제 수단으로 자동 환불됩니다.',
-    'OLED': 'LG OLED TV는 자체 발광 소자를 사용하여 완벽한 블랙과 무한 명암비를 구현합니다. 시청 용도와 공간 크기에 따라 G4(갤러리형), C4(올라운더), M4(무선) 시리즈를 추천드립니다!',
-    '가격': '제품별 가격은 사이트 상품 페이지에서 확인하실 수 있습니다. 현재 진행 중인 프로모션이 있을 수 있으니 확인해 보세요!',
-    '할부': 'LG전자 공식 쇼핑몰에서는 최대 36개월 무이자 할부를 지원합니다. 카드사별 혜택이 다를 수 있으니 결제 시 확인해 주세요.',
-    '보증': 'LG전자 제품은 기본 1년 무상 보증이 제공됩니다. 연장 보증 서비스(LG Care)를 통해 최대 5년까지 연장하실 수 있습니다.',
-    '설치': '대형 가전(TV 55인치 이상, 냉장고, 세탁기)은 전문 설치 기사가 방문하여 무료 설치해 드립니다. 배송 시 일정을 조율합니다.'
+    'OLED': 'LG OLED TV는 완벽한 블랙과 무한 명암비를 구현합니다. G4(갤러리형), C4(올라운더), M4(무선) 시리즈를 추천드립니다.',
+    '가격': '제품별 가격은 사이트 상품 페이지에서 확인하실 수 있습니다.',
+    '할부': 'LG전자 공식 쇼핑몰에서는 최대 36개월 무이자 할부를 지원합니다.',
+    '보증': 'LG전자 제품은 기본 1년 무상 보증이 제공됩니다.',
+    '설치': '대형 가전은 전문 설치 기사가 방문하여 무료 설치해 드립니다.'
 };
 
-window.toggleCsChat = function(){
-    document.getElementById('csChatWindow').classList.toggle('open');
-    document.getElementById('csFab').style.display = document.getElementById('csChatWindow').classList.contains('open') ? 'none' : 'flex';
-};
+const atlasChatWindow = document.getElementById('chat-window');
+const atlasChatBox = document.getElementById('chat-box');
+const atlasInputWrapper = document.getElementById('atlas-chat-input-wrapper');
+const atlasUserInput = atlasInputWrapper ? atlasInputWrapper.querySelector('#user-input') : null;
+const atlasSendBtn = atlasInputWrapper ? atlasInputWrapper.querySelector('#send-btn') : null;
+const atlasCanvas = document.getElementById('atlasCanvas');
+const atlasCtx = atlasCanvas ? atlasCanvas.getContext('2d') : null;
 
-window.sendCsMsg = function(){
-    const input = document.getElementById('csInput');
-    const val = input.value.trim(); if(!val) return;
-    const msgs = document.getElementById('csChatMessages');
-    // User message
-    msgs.innerHTML += `<div class="cs-msg cs-user"><div class="cs-bubble">${val}</div></div>`;
-    input.value = '';
-    msgs.scrollTop = msgs.scrollHeight;
-    // Bot response
-    setTimeout(()=>{
-        let reply = '죄송합니다, 해당 문의에 대한 정확한 답변을 찾지 못했습니다. 고객센터(1544-7777)로 연락 주시면 더 자세히 도와드리겠습니다.';
-        for(const [key, resp] of Object.entries(csResponses)){
-            if(val.includes(key)){ reply = resp; break; }
+let isSpeaking = false;
+let atlasFrame = 0;
+let blinkTimer = 0;
+let eyeOpenness = 1;
+
+function drawAtlas() {
+    if(!atlasCtx) return;
+    atlasCtx.clearRect(0, 0, atlasCanvas.width, atlasCanvas.height);
+    const centerX = atlasCanvas.width / 2;
+    const centerY = 75; 
+    atlasFrame++;
+
+    const speed = 0.03;
+    const breatheY = Math.sin(atlasFrame * speed) * 2;
+    const swayX = Math.sin(atlasFrame * speed * 0.5) * 1.5;
+    const headPanX = Math.sin(atlasFrame * speed * 0.7) * 2.5;
+    const armSwing = Math.sin(atlasFrame * speed * 1.2) * 4; 
+
+    if (blinkTimer > 0) {
+        blinkTimer--;
+        eyeOpenness = (blinkTimer > 10 || blinkTimer < 3) ? 0.3 : 0;
+    } else {
+        eyeOpenness = 1;
+        if (Math.random() < 0.015) blinkTimer = 15;
+    }
+
+    atlasCtx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    atlasCtx.beginPath();
+    atlasCtx.ellipse(centerX + swayX*0.5, centerY + 75, 28 + breatheY, 4, 0, 0, Math.PI * 2);
+    atlasCtx.fill();
+
+    function drawLimb(startX, startY, swingX, isBack, isArm) {
+        const zColor = isBack ? '#666' : '#d4d4d4'; 
+        const jointColor = isBack ? '#1a1a1a' : '#2a2a2a';
+        const length1 = isArm ? 18 : 22; 
+        const length2 = isArm ? 18 : 24; 
+        const midX = startX + swingX;
+        const midY = startY + length1;
+        const endX = startX + swingX * (isArm ? 1.5 : -0.2);
+        const endY = midY + length2;
+
+        atlasCtx.strokeStyle = jointColor; 
+        atlasCtx.lineWidth = isArm ? 5 : 7; 
+        atlasCtx.lineCap = 'round';
+        atlasCtx.lineJoin = 'round';
+        atlasCtx.beginPath(); atlasCtx.moveTo(startX, startY); atlasCtx.lineTo(midX, midY); atlasCtx.lineTo(endX, endY); atlasCtx.stroke();
+
+        atlasCtx.fillStyle = zColor;
+        if (!isArm) {
+            atlasCtx.beginPath(); atlasCtx.roundRect(startX - 5 + swingX*0.5, startY + 2, 10, length1 - 4, 3); atlasCtx.fill();
+            atlasCtx.beginPath(); atlasCtx.roundRect(endX - 4 + (midX-endX)*0.5, midY + 2, 8, length2 - 4, 2); atlasCtx.fill();
+            atlasCtx.fillStyle = jointColor;
+            atlasCtx.beginPath(); atlasCtx.roundRect(endX - 8, endY, 16, 7, 3); atlasCtx.fill();
+        } else {
+            atlasCtx.beginPath(); atlasCtx.roundRect(startX - 7, startY - 7, 14, 12, 4); atlasCtx.fill();
+            atlasCtx.beginPath(); atlasCtx.roundRect(endX - 3.5 + (midX-endX)*0.5, midY + 2, 7, length2 - 6, 2); atlasCtx.fill();
+            atlasCtx.fillStyle = jointColor;
+            atlasCtx.beginPath(); atlasCtx.arc(endX, endY, 4, 0, Math.PI*2); atlasCtx.fill();
         }
-        msgs.innerHTML += `<div class="cs-msg cs-bot"><div class="cs-bubble">${reply}</div></div>`;
-        msgs.scrollTop = msgs.scrollHeight;
-    }, 800);
+
+        atlasCtx.fillStyle = '#111';
+        atlasCtx.beginPath(); atlasCtx.arc(midX, midY, isArm ? 3 : 4, 0, Math.PI*2); atlasCtx.fill();
+    }
+
+    const bodyX = centerX + swayX;
+    const bodyY = centerY + breatheY;
+
+    drawLimb(bodyX + 14, bodyY + 25, -2, true, false);
+    drawLimb(bodyX + 22, bodyY - 10, -armSwing, true, true);
+
+    atlasCtx.fillStyle = '#333';
+    atlasCtx.beginPath(); atlasCtx.roundRect(bodyX - 14, bodyY + 16, 28, 14, 4); atlasCtx.fill();
+    
+    atlasCtx.fillStyle = '#222';
+    atlasCtx.fillRect(bodyX - 8, bodyY + 5, 16, 14);
+    atlasCtx.strokeStyle = '#666'; atlasCtx.lineWidth = 2;
+    atlasCtx.beginPath(); atlasCtx.moveTo(bodyX-4, bodyY+5); atlasCtx.lineTo(bodyX-4, bodyY+18); atlasCtx.stroke();
+    atlasCtx.beginPath(); atlasCtx.moveTo(bodyX+4, bodyY+5); atlasCtx.lineTo(bodyX+4, bodyY+18); atlasCtx.stroke();
+
+    atlasCtx.fillStyle = '#eee';
+    atlasCtx.beginPath();
+    atlasCtx.moveTo(bodyX - 20, bodyY - 15);
+    atlasCtx.lineTo(bodyX + 20, bodyY - 15);
+    atlasCtx.lineTo(bodyX + 16, bodyY + 8);
+    atlasCtx.lineTo(bodyX - 16, bodyY + 8);
+    atlasCtx.closePath();
+    atlasCtx.fill();
+    
+    atlasCtx.fillStyle = '#222';
+    atlasCtx.beginPath(); atlasCtx.roundRect(bodyX - 10, bodyY - 8, 20, 8, 2); atlasCtx.fill();
+    atlasCtx.fillStyle = '#00b0ff';
+    atlasCtx.beginPath(); atlasCtx.arc(bodyX, bodyY - 4, 2.5, 0, Math.PI*2); atlasCtx.fill();
+
+    const headX = bodyX + headPanX;
+    const headY = bodyY - 32;
+    
+    atlasCtx.fillStyle = '#333';
+    atlasCtx.fillRect(bodyX - 5, headY + 14, 10, 8);
+    
+    atlasCtx.fillStyle = '#e0e0e0';
+    atlasCtx.beginPath();
+    atlasCtx.roundRect(headX - 15, headY - 15, 30, 30, 8);
+    atlasCtx.fill();
+
+    atlasCtx.fillStyle = '#0a0a0a';
+    atlasCtx.beginPath();
+    atlasCtx.roundRect(headX - 13, headY - 11, 26, 22, 5);
+    atlasCtx.fill();
+
+    const eyeY = headY - 4;
+    const eyeWidth = 6;
+    const eyeHeight = Math.max(0.1, 6 * eyeOpenness); 
+    
+    atlasCtx.fillStyle = isSpeaking ? '#ff1744' : '#00e676';
+    atlasCtx.shadowBlur = 5;
+    atlasCtx.shadowColor = atlasCtx.fillStyle;
+    
+    atlasCtx.beginPath();
+    atlasCtx.ellipse(headX - 5 + headPanX*0.3, eyeY, eyeWidth/2, eyeHeight/2, 0, 0, Math.PI*2);
+    atlasCtx.fill();
+    atlasCtx.beginPath();
+    atlasCtx.ellipse(headX + 5 + headPanX*0.3, eyeY, eyeWidth/2, eyeHeight/2, 0, 0, Math.PI*2);
+    atlasCtx.fill();
+    atlasCtx.shadowBlur = 0;
+
+    const mouthY = headY + 5;
+    if (isSpeaking) {
+        const bars = 5;
+        const barWidth = 2.5;
+        const spacing = 4;
+        const startX = headX - ((bars-1) * spacing) / 2;
+        atlasCtx.fillStyle = '#ff1744';
+        atlasCtx.shadowBlur = 8;
+        atlasCtx.shadowColor = '#ff1744';
+        for (let i = 0; i < bars; i++) {
+            const h = 2 + Math.random() * 6;
+            atlasCtx.beginPath();
+            atlasCtx.roundRect(startX + (i * spacing) - barWidth/2, mouthY - h/2, barWidth, h, 1);
+            atlasCtx.fill();
+        }
+    } else if (atlasUserInput && atlasUserInput.value.trim().length > 0) {
+        const mouthWidth = 10;
+        atlasCtx.fillStyle = '#00e676';
+        atlasCtx.shadowBlur = 5;
+        atlasCtx.shadowColor = '#00e676';
+        atlasCtx.globalAlpha = 0.5 + Math.sin(atlasFrame * 0.2) * 0.5; 
+        atlasCtx.beginPath();
+        atlasCtx.roundRect(headX - mouthWidth/2, mouthY - 1, mouthWidth, 2, 1);
+        atlasCtx.fill();
+        atlasCtx.globalAlpha = 1.0;
+    } else {
+        atlasCtx.fillStyle = '#00e676';
+        atlasCtx.globalAlpha = 0.3;
+        atlasCtx.beginPath();
+        atlasCtx.roundRect(headX - 2, mouthY - 1, 4, 2, 1);
+        atlasCtx.fill();
+        atlasCtx.globalAlpha = 1.0;
+    }
+    atlasCtx.shadowBlur = 0;
+
+    drawLimb(bodyX - 14, bodyY + 25, 2, false, false);
+    drawLimb(bodyX - 22, bodyY - 10, armSwing, false, true);
+
+    requestAnimationFrame(drawAtlas);
+}
+
+window.toggleChat = function() {
+    if(!atlasChatWindow) return;
+    const isVisible = atlasChatWindow.style.display === 'flex';
+    atlasChatWindow.style.display = isVisible ? 'none' : 'flex';
+    if (!isVisible && atlasUserInput) atlasUserInput.focus();
 };
-document.getElementById('csInput').addEventListener('keypress',e=>{ if(e.key==='Enter') sendCsMsg(); });
+
+window.sendMessage = function() {
+    if(!atlasUserInput) return;
+    const text = atlasUserInput.value.trim();
+    if (!text) return;
+    appendAtlasMessage(text, 'user-msg');
+    atlasUserInput.value = '';
+    setTimeout(() => {
+        robotSpeakResponse(text);
+    }, 600);
+};
+
+window.robotSpeakResponse = function(userText) {
+    isSpeaking = true;
+    let responseText = "";
+    let foundCommerceResponse = false;
+    for(const [key, resp] of Object.entries(csResponses)){
+        if(userText.includes(key)){ 
+            responseText = resp + " 삐빅- 추가 지원이 필요합니까?"; 
+            foundCommerceResponse = true; break; 
+        }
+    }
+
+    if(!foundCommerceResponse) {
+        if (userText.includes("안녕")) { 
+            responseText = "안녕하십니까, 인간. 시스템 분석 결과 주변 환경이 매우 쾌적합니다."; 
+        } else if (userText.includes("움직") || userText.includes("동작")) { 
+            responseText = "제 관절 모터는 HTML5 Canvas 렌더링을 통해 정상 가동 중입니다. 유압 시스템은 안정적입니다."; 
+        } else if (userText.includes("바빠") || userText.includes("뭐해")) { 
+            responseText = "보스턴 다이내믹스 상부 보고 및 LG전자 스토어 데이터 백업을 수행 중입니다."; 
+        } else if (userText.includes("이름") || userText.includes("누구")) { 
+            responseText = "제 식별 코드는 'Atlas' 입니다. 당신의 완벽한 쇼핑 경험을 돕도록 설계되었습니다."; 
+        } else { 
+            responseText = `'${userText}' 명령을 수신했습니다. 현재 프로토타입 상태이므로 구체적인 수행은 어렵습니다. 삐빅-`; 
+        }
+    }
+
+    appendAtlasMessage(responseText, 'bot-msg');
+    const speakTime = Math.min(responseText.length * 70, 5000); 
+    setTimeout(() => { isSpeaking = false; }, speakTime);
+};
+
+function appendAtlasMessage(text, className) {
+    if(!atlasChatBox) return;
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `msg ${className}`;
+    msgDiv.innerText = text;
+    atlasChatBox.appendChild(msgDiv);
+    atlasChatBox.scrollTo({ top: atlasChatBox.scrollHeight, behavior: 'smooth' });
+}
+
+if(atlasSendBtn) atlasSendBtn.addEventListener('click', sendMessage);
+if(atlasUserInput) atlasUserInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMessage();
+});
+
+// 시작 시 캔버스 렌더링 시작
+if(atlasCanvas) drawAtlas();
 
 // ==================== PAYMENT OPTION HIGHLIGHT ====================
 document.querySelectorAll('.pay-option').forEach(opt=>{
