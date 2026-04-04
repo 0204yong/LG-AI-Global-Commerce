@@ -295,7 +295,7 @@ window.togglePane = function(){
 // ==================== ADMIN CHAT ====================
 let currentAgentIconUrl = '';
 
-function addMsg(text, isUser=false, customAvatarUrl=null) {
+function addMsg(text, isUser=false, agentId=null) {
     const d=document.createElement('div');
     d.className=`message ${isUser?'user-message':'ai-message'}`;
     let avatarHTML = '';
@@ -303,11 +303,15 @@ function addMsg(text, isUser=false, customAvatarUrl=null) {
     if(isUser) {
         avatarHTML = `<div class="avatar"><i class="fa-solid fa-user"></i></div>`;
     } else {
-        const renderUrl = customAvatarUrl || currentAgentIconUrl;
-        if (renderUrl) {
-            avatarHTML = `<div class="avatar" style="background:transparent; padding:0; overflow:hidden;"><img src="${renderUrl}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;"></div>`;
+        if(agentId) {
+            avatarHTML = getAgentAvatarHTML(agentId);
         } else {
-            avatarHTML = `<div class="avatar atlas-chat"><i class="fa-solid fa-robot"></i></div>`;
+            const renderUrl = currentAgentIconUrl;
+            if (renderUrl) {
+                avatarHTML = `<div class="avatar" style="background:transparent; padding:0; overflow:hidden;"><img src="${renderUrl}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;"></div>`;
+            } else {
+                avatarHTML = `<div class="avatar atlas-chat"><i class="fa-solid fa-robot"></i></div>`;
+            }
         }
     }
     
@@ -339,7 +343,7 @@ function processIntent(text){
         <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-palette"></i> change_theme</div>
         <div class="ai-card-details">• theme_id: black_friday<br>• color_mode: dark<br>• accent_color: neon_red<br>• impact: 글로벌 UI 테마 롤아웃 대기중</div>
         <div style="display:flex;gap:.4rem">
-            <button class="btn btn-approve" onclick="execTheme('black_friday',this)">✓ 승인 (Deploy)</button>
+            <button class="btn btn-approve" onclick="execTheme('black_friday',this,'site')">✓ 승인 (Deploy)</button>
             <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=\\'color:#ef4444\\'>✗ 취소됨</span>'">✗ 취소</button>
         </div></div></div>`;
         chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
@@ -354,7 +358,7 @@ function processIntent(text){
         <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-plus-circle"></i> add_product</div>
         <div class="ai-card-details">• category: Appliance<br>• product_name: LG 코드제로 오브제컬렉션 A9S<br>• price: <b>${fmt(newPrice,L)}</b><br>• status: 즉시 퍼블리싱 대기중</div>
         <div style="display:flex;gap:.4rem">
-            <button class="btn btn-approve" onclick="execAddProduct('vacuum', ${newPrice}, this)">✓ 승인 (Publish)</button>
+            <button class="btn btn-approve" onclick="execAddProduct('vacuum', ${newPrice}, this, 'product')">✓ 승인 (Publish)</button>
             <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=\\'color:#ef4444\\'>✗ 취소됨</span>'">✗ 취소</button>
         </div></div></div>`;
         chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
@@ -395,7 +399,7 @@ function processIntent(text){
         <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-ticket-simple"></i> create_coupon</div>
         <div class="ai-card-details">• region: ${region} (${regionName})<br>• target: ${target} (${affectedProducts.length}개 상품)<br>• discount: -${disc}%<br>• auto_localize: true${profitBar}</div>
         <div style="display:flex;gap:.4rem">
-            <button class="btn btn-approve" onclick="execDiscount('${region}','${catFilter}',${disc},this)">✓ 승인 (Deploy)</button>
+            <button class="btn btn-approve" onclick="execDiscount('${region}','${catFilter}',${disc},this,'promo')">✓ 승인 (Deploy)</button>
             <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=color:#ef4444>✗ 취소됨</span>'">✗ 취소</button>
         </div></div></div>`;
         chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
@@ -419,7 +423,7 @@ function processIntent(text){
         <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-boxes-stacked"></i> create_bundle</div>
         <div class="ai-card-details">• items: ${bp.map(p=>'<br>  └ '+p.name+' ('+fmt(p.price,L)+')').join('')}<br>• 정가 합계: ${fmt(tot,L)}<br>• 번들가(-${bundleDisc}%): <b>${fmt(tot*(1-bundleDisc/100),L)}</b><br>• 절약: <span style="color:#10b981">${fmt(tot*bundleDisc/100,L)}</span></div>
         <div style="display:flex;gap:.4rem">
-            <button class="btn btn-approve" onclick="execBundle('${items.join(',')}',${bundleDisc},'${region}',this)">✓ 승인 (Deploy)</button>
+            <button class="btn btn-approve" onclick="execBundle('${items.join(',')}',${bundleDisc},'${region}',this,'promo')">✓ 승인 (Deploy)</button>
             <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=color:#ef4444>✗ 취소됨</span>'">✗ 취소</button>
         </div></div></div>`;
         chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
@@ -461,7 +465,7 @@ function processIntent(text){
             <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-tag"></i> update_discount</div>
             <div class="ai-card-details">• product: ${targetProduct.name}<br>• 할인율: <b>${discountPct}%</b><br>• 할인가: <span style="color:#10b981">${fmt(targetProduct.price * (1 - discountPct/100), L)}</span></div>
             <div style="display:flex;gap:.4rem">
-                <button class="btn btn-approve" onclick="execProductDiscount('${targetProduct.id}',${discountPct},this)">✓ 승인 (Deploy)</button>
+                <button class="btn btn-approve" onclick="execProductDiscount('${targetProduct.id}',${discountPct},this,'price')">✓ 승인 (Deploy)</button>
                 <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=color:#ef4444>✗ 취소됨</span>'">✗ 취소</button>
             </div></div></div>`;
             chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
@@ -474,7 +478,7 @@ function processIntent(text){
             <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-coins"></i> set_standard_price</div>
             <div class="ai-card-details">• product: ${targetProduct.name}<br>• 기존가: ${fmt(targetProduct.price, L)}<br>• 신규등록가: <b>${fmt(newPrice, L)}</b><br>• 변동: <span style="color:${diff>0?'#ef4444':'#10b981'}">${diff>0?'+':''}${pctChange}%</span></div>
             <div style="display:flex;gap:.4rem">
-                <button class="btn btn-approve" onclick="execPrice('${targetProduct.id}',${newPrice},this)">✓ 승인 (Deploy)</button>
+                <button class="btn btn-approve" onclick="execPrice('${targetProduct.id}',${newPrice},this,'price')">✓ 승인 (Deploy)</button>
                 <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=color:#ef4444>✗ 취소됨</span>'">✗ 취소</button>
             </div></div></div>`;
             chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
@@ -497,7 +501,7 @@ function processIntent(text){
         <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-globe"></i> deploy_country</div>
         <div class="ai-card-details">• target: ${L.region}<br>• domain: lg.com/${targetCode.toLowerCase()}<br>• currency: ${L.cur}<br>• language: auto-translate (AI)<br>• products: ${products.filter(p=>!p.bundleItems).length}개 상품 자동 변환<br>• estimated_time: ~30초 (기존 6개월 → AI 자동화)</div>
         <div style="display:flex;gap:.4rem">
-            <button class="btn btn-approve" onclick="execRollout('${targetCode}',this)">✓ 승인 (Deploy)</button>
+            <button class="btn btn-approve" onclick="execRollout('${targetCode}',this,'site')">✓ 승인 (Deploy)</button>
             <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=color:#ef4444>✗ 취소됨</span>'">✗ 취소</button>
         </div></div></div>`;
         chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
@@ -555,7 +559,7 @@ window.switchAgent = function(id, el) {
     addMsg(`🤖 <b>[${nameMap[id]}] 활성화됨.</b><br>해당 분야에 대한 자연어 명령을 대기 중입니다.<br>
         <div class="suggestion-chips" style="margin-top:.5rem">
             ${chipsHTML}
-        </div>`, false, currentAgentIconUrl);
+        </div>`, false, id);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 };
 
@@ -573,35 +577,35 @@ function showFallback() {
     },500);
 }
 
-window.execDiscount = function(region,catFilter,disc,btn){
+window.execDiscount = function(region,catFilter,disc,btn,agentId){
     currentStoreId=region;
     products.forEach(p=>{ if(catFilter==='all'||p.cat===catFilter) p.discount=disc; });
     btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> Live 배포 완료</span>';
-    addMsg(`✅ <b>배포 완료.</b> 우측 스토어에서 확인하세요!<br>1. 할인 배지 실시간 반영<br>2. 상품 클릭 → 상세에서도 할인 적용`);
+    addMsg(`✅ <b>배포 완료.</b> 우측 스토어에서 확인하세요!<br>1. 할인 배지 실시간 반영<br>2. 상품 클릭 → 상세에서도 할인 적용`, false, agentId);
     renderStore(); document.querySelector('.product-section').scrollIntoView({behavior:'smooth'});
 };
 
-window.execProductDiscount = function(id, disc, btn){
+window.execProductDiscount = function(id, disc, btn, agentId){
     const p = products.find(x => x.id === id);
     if(p) p.discount = disc;
     btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 실시간 할인 반영 완료</span>';
-    addMsg(`✅ <b>[${p.name}] ${disc}% 할인 적용 완료.</b><br>메인 스토어에 표기되었습니다.`);
+    addMsg(`✅ <b>[${p.name}] ${disc}% 할인 적용 완료.</b><br>메인 스토어에 표기되었습니다.`, false, agentId);
     renderStore(); document.querySelector('.product-section').scrollIntoView({behavior:'smooth'});
 };
 
-window.execPrice = function(id, newPrice, btn){
+window.execPrice = function(id, newPrice, btn, agentId){
     const p = products.find(x => x.id === id);
     if(p) {
         p.price = newPrice;
         p.discount = 0; // reset discount on standard price change
     }
-    btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 표준 가격 등록 완료</span>';
-    addMsg(`✅ <b>[${p.name}] 표준 가격 업데이트 완료.</b><br>신규 판매가: <b>${newPrice}</b><br>메인 스토어에 표기되었습니다.`);
+    btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 가격 변경 완료</span>';
+    addMsg(`✅ <b>[${p.name}] 가격이 변경되었습니다.</b><br>${fmt(p.price, locales[currentStoreId]||locales.KR)} → <b>${newPrice}</b><br>메인 스토어에 표기되었습니다.`, false, agentId);
     renderStore(); document.querySelector('.product-section').scrollIntoView({behavior:'smooth'});
 };
 
 // ==================== NEW INTENT EXECS ====================
-window.execTheme = function(themeId, btn){
+window.execTheme = function(themeId, btn, agentId){
     document.body.classList.add('black-friday');
     document.getElementById('promo1').textContent = 'BLACK FRIDAY SALE';
     document.getElementById('promo2').textContent = 'UP TO 50% OFF';
@@ -613,23 +617,23 @@ window.execTheme = function(themeId, btn){
     document.getElementById('heroTitle').textContent = 'Unbelievable Deals';
     document.getElementById('heroDesc').textContent = 'Shop the best AI-powered electronics at the lowest prices of the year.';
     btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 테마 반영 완료</span>';
-    addMsg(`✅ <b>전역 테마 업데이트 완료!</b><br>스토어가 블랙프라이데이 다크모드 및 프로모션 가격으로 자동 세팅되었습니다.`);
+    addMsg(`✅ <b>전역 테마 업데이트 완료!</b><br>스토어가 블랙프라이데이 다크모드 및 프로모션 가격으로 자동 세팅되었습니다.`, false, agentId);
     renderStore(); document.getElementById('storePane').scrollTo({top:0,behavior:'smooth'});
 };
 
-window.execAddProduct = function(type, price, btn){
+window.execAddProduct = function(type, price, btn, agentId){
     const newItem = { id:'vac_'+Date.now(), cat:'Appliance', name:'LG 코드제로 오브제컬렉션 A9S', model:'AU9990', price:price, img:'assets/images/products/vacuum.jpg', desc:'더 강력해진 흡입력과 AI 기반의 스마트 청정 스테이션을 경험하세요.', isNew:true };
     // placeholder image using washer.png
     products.unshift(newItem);
     btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 제품 등록 완료</span>';
-    addMsg(`✅ <b>신제품 등록 완료!</b><br>🛍️ LG 코드제로 오브제컬렉션 A9S<br>스토어 상단에 즉시 노출되었습니다.`);
+    addMsg(`✅ <b>신제품 등록 완료!</b><br>🛍️ LG 코드제로 오브제컬렉션 A9S<br>스토어 상단에 즉시 노출되었습니다.`, false, agentId);
     activeFilter='all'; document.querySelectorAll('.gnb-link').forEach(l=>l.classList.remove('active'));
     document.querySelector('[data-cat="all"]').classList.add('active');
     renderStore(); document.querySelector('.product-section').scrollIntoView({behavior:'smooth'});
 };
 
 // ==================== COUNTRY ROLLOUT ====================
-window.execRollout = function(code, btn){
+window.execRollout = function(code, btn, agentId){
     btn.disabled = true;
     btn.textContent = '⏳ 배포 중...';
     const L = locales[code];
@@ -644,7 +648,7 @@ window.execRollout = function(code, btn){
     ];
     let progress = document.createElement('div');
     progress.className='message ai-message';
-    progress.innerHTML=`<div class="avatar"><i class="fa-solid fa-sparkles"></i></div><div class="bubble"><b>🚀 국가 배포 진행 중...</b><div class="rollout-steps" id="rolloutSteps"></div></div>`;
+    progress.innerHTML=`${agentId ? getAgentAvatarHTML(agentId) : getAgentAvatarHTML('site')}<div class="bubble"><b>🚀 국가 배포 진행 중...</b><div class="rollout-steps" id="rolloutSteps"></div></div>`;
     chatContainer.appendChild(progress);
     chatContainer.scrollTop = chatContainer.scrollHeight;
     const stepsEl = document.getElementById('rolloutSteps');
@@ -660,7 +664,7 @@ window.execRollout = function(code, btn){
                     currentStoreId = code;
                     renderStore();
                     btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 배포 완료</span>';
-                    addMsg(`🎉 <b>${L.region} 사이트가 오픈되었습니다!</b><br><br>✅ 우측 스토어가 자동 전환되었습니다:<br>• 언어: ${L.country} 현지어<br>• 통화: ${L.cur}<br>• 배송/결제: 현지 적용<br><br>💡 <b>기존 6개월 → 30초</b>로 국가 개설 완료!`);
+                    addMsg(`🎉 <b>${L.region} 사이트가 오픈되었습니다!</b><br><br>✅ 우측 스토어가 자동 전환되었습니다:<br>• 언어: ${L.country} 현지어<br>• 통화: ${L.cur}<br>• 배송/결제: 현지 적용<br><br>💡 <b>기존 6개월 → 30초</b>로 국가 개설 완료!`, false, agentId);
                     document.getElementById('storePane').scrollTo({top:0,behavior:'smooth'});
                 },500);
             }
