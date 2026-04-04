@@ -21,7 +21,7 @@ jobs:
       - name: Validate HTML structure
         run: |
           echo "🔍 Validating HTML files..."
-          if grep -q '<!DOCTYPE html>' index.html; then
+          if grep -q '<!DOCTYPE html>' "LG AI Global Commerce/index.html"; then
             echo "✅ index.html has valid DOCTYPE"
           else
             echo "❌ Missing DOCTYPE" && exit 1
@@ -30,7 +30,7 @@ jobs:
       - name: Check required files
         run: |
           echo "📁 Checking required files..."
-          for file in index.html style.css script.js manifest.json service-worker.js; do
+          for file in "LG AI Global Commerce/index.html" "LG AI Global Commerce/assets/css/style.css" "LG AI Global Commerce/assets/js/script.js" "LG AI Global Commerce/manifest.json" "LG AI Global Commerce/service-worker.js"; do
             if [ -f "$file" ]; then
               echo "✅ $file exists"
             else
@@ -41,8 +41,8 @@ jobs:
       - name: Validate JSON files
         run: |
           echo "🔍 Validating JSON files..."
-          node -e "JSON.parse(require('fs').readFileSync('manifest.json','utf8')); console.log('✅ manifest.json is valid JSON')"
-          node -e "JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('✅ package.json is valid JSON')"
+          node -e "JSON.parse(require('fs').readFileSync('LG AI Global Commerce/manifest.json','utf8')); console.log('✅ manifest.json is valid JSON')"
+          node -e "JSON.parse(require('fs').readFileSync('LG AI Global Commerce/package.json','utf8')); console.log('✅ package.json is valid JSON')"
           node -e "JSON.parse(require('fs').readFileSync('vercel.json','utf8')); console.log('✅ vercel.json is valid JSON')"
 
       - name: Report success
