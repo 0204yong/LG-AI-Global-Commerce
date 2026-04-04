@@ -1,9 +1,9 @@
 // ==================== SERVICE WORKER ====================
-const CACHE_NAME = 'lg-ai-commerce-v15';
+const CACHE_NAME = 'lg-ai-commerce-v16';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
-  '/assets/css/style.css?v=15',
+  '/assets/css/style.css?v=16',
   '/assets/js/data.js?v=3',
   '/assets/js/script.js?v=14',
   '/manifest.json',

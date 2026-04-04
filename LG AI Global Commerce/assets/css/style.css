@@ -26,8 +26,7 @@ body {background:var(--admin-bg);color:var(--admin-text);height:100vh;overflow:h
 .chat-container{flex-grow:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1.5rem;background:#0f172a;scroll-behavior:smooth}
 
 /* Agent Dashboard */
-.agent-dashboard { display:flex; gap:0.8rem; padding:1rem; border-bottom:1px solid #1e293b; overflow-x:auto; -ms-overflow-style:none; scrollbar-width:none; background:#0f172a; }
-.agent-dashboard::-webkit-scrollbar { display:none; }
+.agent-dashboard { display:flex; flex-wrap:wrap; justify-content:center; gap:0.8rem; padding:1rem; border-bottom:1px solid #1e293b; background:#0f172a; }
 .agent-item { display:flex; flex-direction:column; align-items:center; gap:0.4rem; cursor:pointer; opacity:0.5; transition:all 0.3s ease; flex-shrink:0; }
 .agent-item:hover, .agent-item.active { opacity:1; }
 .agent-item.active { transform:scale(1.05); }
