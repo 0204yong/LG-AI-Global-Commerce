@@ -70,7 +70,7 @@ body {background:var(--admin-bg);color:var(--admin-text);height:100vh;overflow:h
 .promo-item{display:flex;align-items:center;gap:.4rem}
 .product-section{padding:3rem 2rem 2rem}
 .section-heading{font-size:1.8rem;font-weight:800;margin-bottom:1.5rem;letter-spacing:-1px}
-.product-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;padding-bottom:1.5rem}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:1.5rem;padding-bottom:1.5rem}
 .product-card{border:1px solid var(--store-border);background:var(--store-card-bg);border-radius:20px;overflow:hidden;cursor:pointer;transition:transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;position:relative}
 .product-card:hover{transform:translateY(-5px) scale(1.02);box-shadow:0 15px 30px var(--store-card-hover)}
 .product-card:hover .pc-img img{transform:scale(1.05)}
