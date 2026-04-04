@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LG AI Global Commerce – Zero-Click Admin Demo</title>
-    <link rel="stylesheet" href="assets/css/style.css?v=22">
+    <link rel="stylesheet" href="assets/css/style.css?v=23">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- PWA -->
@@ -31,7 +31,7 @@
         </div>
         <div class="agent-dashboard">
             <div class="agent-item active" onclick="switchAgent('atlas', this)" title="Atlas (Chief AI)">
-                <div class="agent-avatar atlas-anim"><img src="assets/images/agents/atlas_agent.png" id="avatar_atlas" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
+                <div class="agent-avatar atlas-anim"><i class="fa-solid fa-robot"></i></div>
                 <span>Atlas</span>
             </div>
             <div class="agent-item" onclick="switchAgent('promo', this)" title="프로모션">
@@ -61,7 +61,7 @@
         </div>
         <div class="chat-container" id="chatContainer">
             <div class="message ai-message">
-                <div class="avatar" style="background:transparent; padding:0; overflow:hidden;"><img src="assets/images/agents/atlas_agent.png" style="width:100%; height:100%; border-radius:50%; object-fit:cover;"></div>
+                <div class="avatar atlas-chat"><i class="fa-solid fa-robot"></i></div>
                 <div class="bubble">
                     <b>Zero-Click 커머스 어드민에 오신 것을 환영합니다.</b><br>
                     (총괄 관리자 AI Atlas 활성화됨)<br><br>
@@ -252,8 +252,8 @@
     </div>
 </div>
 
-<script src="assets/js/data.js?v=9"></script>
-<script src="assets/js/script.js?v=21"></script>
+<script src="assets/js/data.js?v=10"></script>
+<script src="assets/js/script.js?v=22"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 <script>
   // Register Service Worker for PWA
