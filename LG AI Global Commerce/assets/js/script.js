@@ -294,6 +294,7 @@ window.togglePane = function(){
 
 // ==================== ADMIN CHAT ====================
 let currentAgentIconUrl = '';
+let currentActiveAgentId = 'atlas';
 
 function addMsg(text, isUser=false, agentId=null) {
     const d=document.createElement('div');
@@ -332,188 +333,121 @@ function getAgentAvatarHTML(agentId) {
     return `<div class="avatar" style="background:transparent; padding:0; overflow:hidden;"><img src="${url}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;"></div>`;
 }
 
-function processIntent(text){
-    let fallbackAvHTML = currentAgentIconUrl ? `<div class="avatar" style="background:transparent; padding:0; overflow:hidden;"><img src="${currentAgentIconUrl}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;"></div>` : getAgentAvatarHTML('atlas');
+async function processIntent(text){
+    const typingId = 'typing_' + Date.now();
+    const typingMsg = document.createElement('div');
+    typingMsg.className = 'message ai-message';
+    typingMsg.id = typingId;
+    typingMsg.innerHTML = `${getAgentAvatarHTML(currentActiveAgentId)}<div class="bubble"><i class="fa-solid fa-circle-notch fa-spin"></i> (AI 분석 중...)</div>`;
+    chatContainer.appendChild(typingMsg);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
 
-    // ---- Intent 0: Theme Change ----
-    if(text.includes('테마') || text.includes('다크') || text.includes('블랙 프라이데이') || text.includes('블랙프라이데이') || text.includes('템플릿')){
-        const aiMsg=document.createElement('div'); aiMsg.className='message ai-message';
-        aiMsg.innerHTML=`${getAgentAvatarHTML('site')}
-        <div class="bubble"><b>✅ Intent: change_theme()</b>
-        <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-palette"></i> change_theme</div>
-        <div class="ai-card-details">• theme_id: black_friday<br>• color_mode: dark<br>• accent_color: neon_red<br>• impact: 글로벌 UI 테마 롤아웃 대기중</div>
-        <div style="display:flex;gap:.4rem">
-            <button class="btn btn-approve" onclick="execTheme('black_friday',this,'site')">✓ 승인 (Deploy)</button>
-            <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=\\'color:#ef4444\\'>✗ 취소됨</span>'">✗ 취소</button>
-        </div></div></div>`;
-        chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
-    }
-    // ---- Intent 0.5: Add Product ----
-    if(text.includes('신제품') || text.includes('신규 등록') || text.includes('청소기')){
-        const L=locales[currentStoreId]||locales.KR;
-        const newPrice = 1250000;
-        const aiMsg=document.createElement('div'); aiMsg.className='message ai-message';
-        aiMsg.innerHTML=`${getAgentAvatarHTML('product')}
-        <div class="bubble"><b>✅ Intent: add_product()</b>
-        <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-plus-circle"></i> add_product</div>
-        <div class="ai-card-details">• category: Appliance<br>• product_name: LG 코드제로 오브제컬렉션 A9S<br>• price: <b>${fmt(newPrice,L)}</b><br>• status: 즉시 퍼블리싱 대기중</div>
-        <div style="display:flex;gap:.4rem">
-            <button class="btn btn-approve" onclick="execAddProduct('vacuum', ${newPrice}, this, 'product')">✓ 승인 (Publish)</button>
-            <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=\\'color:#ef4444\\'>✗ 취소됨</span>'">✗ 취소</button>
-        </div></div></div>`;
-        chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
-    }
-
-    // ---- Intent 1: Coupon / Discount ----
-    if(text.includes('할인') || text.includes('쿠폰')){
-        const m=text.match(/(\d+)%/); const disc=m?parseInt(m[1]):20;
-        let region=currentStoreId, regionName='대한민국';
-        if(text.includes('스페인')){region='ES';regionName='España';}
-        if(text.includes('미국')||text.includes('영국')){region='UK';regionName='United Kingdom';}
-        const tvOnly = text.includes('OLED') || text.includes('TV');
-        const appOnly = text.includes('가전') || text.includes('세탁') || text.includes('냉장');
-        let catFilter='all', target='전체 상품';
-        if(tvOnly){catFilter='TV';target='TV 카테고리';}
-        if(appOnly){catFilter='Appliance';target='가전 카테고리';}
-        const L=locales[region]||locales.KR;
-        // Profitability analysis
-        const affectedProducts = catFilter==='all' ? products : products.filter(p=>p.cat===catFilter);
-        const totalRevBefore = affectedProducts.reduce((s,p)=>s+p.price,0);
-        const totalRevAfter = totalRevBefore * (1 - disc/100);
-        const revLoss = totalRevBefore - totalRevAfter;
-        const convLift = Math.round(disc * 0.9);
-        const netImpact = (convLift * 0.5) - disc;
-        const riskLevel = disc <= 15 ? '🟢 Low' : disc <= 30 ? '🟡 Medium' : '🔴 High';
-        const profitBar = `<div style="margin-top:.5rem;border-top:1px solid rgba(255,255,255,.1);padding-top:.5rem">
-            <div style="font-weight:700;margin-bottom:.3rem">📊 수익성 분석 (AI Forecast)</div>
-            <div style="display:flex;justify-content:space-between;font-size:.7rem;margin:.15rem 0"><span>매출 감소</span><span style="color:#ef4444">-${fmt(revLoss,L)}</span></div>
-            <div style="display:flex;justify-content:space-between;font-size:.7rem;margin:.15rem 0"><span>전환율 증가</span><span style="color:#10b981">+${convLift}%</span></div>
-            <div style="display:flex;justify-content:space-between;font-size:.7rem;margin:.15rem 0"><span>순이익 영향</span><span style="color:${netImpact>=0?'#10b981':'#ef4444'}">${netImpact>=0?'+':''}${netImpact.toFixed(1)}%</span></div>
-            <div style="display:flex;justify-content:space-between;font-size:.7rem;margin:.15rem 0"><span>위험 수준</span><span>${riskLevel}</span></div>
-            <div style="background:rgba(255,255,255,.05);border-radius:4px;height:6px;margin-top:.3rem;overflow:hidden"><div style="height:100%;width:${Math.min(convLift*2,100)}%;background:linear-gradient(90deg,#10b981,#38bdf8);border-radius:4px"></div></div>
-            <div style="font-size:.6rem;color:#64748b;margin-top:.2rem">예상 전환율 증가 바</div>
-        </div>`;
-        const aiMsg=document.createElement('div'); aiMsg.className='message ai-message';
-        aiMsg.innerHTML=`${getAgentAvatarHTML('promo')}
-        <div class="bubble"><b>✅ Intent: create_coupon()</b>
-        <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-ticket-simple"></i> create_coupon</div>
-        <div class="ai-card-details">• region: ${region} (${regionName})<br>• target: ${target} (${affectedProducts.length}개 상품)<br>• discount: -${disc}%<br>• auto_localize: true${profitBar}</div>
-        <div style="display:flex;gap:.4rem">
-            <button class="btn btn-approve" onclick="execDiscount('${region}','${catFilter}',${disc},this,'promo')">✓ 승인 (Deploy)</button>
-            <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=color:#ef4444>✗ 취소됨</span>'">✗ 취소</button>
-        </div></div></div>`;
-        chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
-    }
-    // ---- Intent 2: Bundle ----
-    if(text.includes('번들') || text.includes('세트') || text.includes('묶')){
-        let items=[];
-        if(text.includes('세탁기')||text.includes('세탁')) items.push('washer');
-        if(text.includes('냉장고')) items.push('fridge');
-        if(text.includes('TV')||text.includes('OLED')||text.includes('올레드')) items.push('oled_evo');
-        if(text.includes('사운드바')||text.includes('soundbar')) items.push('soundbar');
-        if(text.includes('노트북')||text.includes('gram')||text.includes('그램')) items.push('gram');
-        if(items.length<2) items=['oled_evo','soundbar'];
-        const bp=items.map(id=>products.find(p=>p.id===id)).filter(Boolean);
-        const tot=bp.reduce((s,p)=>s+p.price,0); const L=locales[currentStoreId]||locales.KR;
-        const discM = text.match(/(\d+)%/); const bundleDisc = discM ? parseInt(discM[1]) : 10;
-        let region=currentStoreId; if(text.includes('스페인')) region='ES';
-        const aiMsg=document.createElement('div'); aiMsg.className='message ai-message';
-        aiMsg.innerHTML=`${getAgentAvatarHTML('promo')}
-        <div class="bubble"><b>✅ Intent: create_bundle()</b>
-        <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-boxes-stacked"></i> create_bundle</div>
-        <div class="ai-card-details">• items: ${bp.map(p=>'<br>  └ '+p.name+' ('+fmt(p.price,L)+')').join('')}<br>• 정가 합계: ${fmt(tot,L)}<br>• 번들가(-${bundleDisc}%): <b>${fmt(tot*(1-bundleDisc/100),L)}</b><br>• 절약: <span style="color:#10b981">${fmt(tot*bundleDisc/100,L)}</span></div>
-        <div style="display:flex;gap:.4rem">
-            <button class="btn btn-approve" onclick="execBundle('${items.join(',')}',${bundleDisc},'${region}',this,'promo')">✓ 승인 (Deploy)</button>
-            <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=color:#ef4444>✗ 취소됨</span>'">✗ 취소</button>
-        </div></div></div>`;
-        chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
-    }
-    // ---- Intent 3: Price / Discount Change ----
-    if(text.includes('가격') || text.includes('할인') || text.includes('파운드')){
-        // Find product by keyword
-        let targetProduct = null;
-        for(const p of products){
-            let nameParts = p.name.toLowerCase().replace(/lg /g,'').split(' ');
-            if(nameParts.some(part => part.length >= 2 && text.toLowerCase().includes(part))){
-                targetProduct = p; break; 
-            }
-        }
+    try {
+        const payload = { text, activeAgent: currentActiveAgentId };
+        const res = await fetch('/api/gemini', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
         
-        let isDiscount = text.includes('%') || text.includes('할인');
-        let newPrice = null;
-        let discountPct = null;
+        const tEl = document.getElementById(typingId);
+        if(tEl) tEl.remove();
 
-        if (isDiscount) {
-            const discM = text.match(/(\d+)%/); 
-            if(discM) discountPct = parseInt(discM[1]);
-        } else {
-            const priceM = text.match(/(\d{2,}(?:,\d{3})*)/); 
-            if(priceM) newPrice = parseInt(priceM[1].replace(/,/g,''));
-        }
-
-        if(!targetProduct || (!newPrice && !discountPct)){
-            addMsg(`가격을 설정할 제품명과 숫자를 명확히 입력해주세요.<br>예: <b>"OLED M4 5000파운드로 표준 가격 등록해줘"</b> 또는 <b>"OLED M4 15% 할인 세팅해줘"</b>`);
+        if (data.error) {
+            addMsg(`오류 발생: ${data.error}`, false, currentActiveAgentId);
             return;
         }
 
-        const L = locales[currentStoreId] || locales.KR;
+        if (data.type === 'text') {
+            addMsg(data.text, false, currentActiveAgentId);
+        } else if (data.type === 'function_call') {
+            const { name, args } = data;
+            const L = locales[currentStoreId] || locales.KR;
 
-        if (isDiscount && discountPct) {
-            const aiMsg = document.createElement('div'); aiMsg.className='message ai-message';
-            aiMsg.innerHTML=`${getAgentAvatarHTML('price')}
-            <div class="bubble"><b>✅ Intent: update_discount()</b>
-            <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-tag"></i> update_discount</div>
-            <div class="ai-card-details">• product: ${targetProduct.name}<br>• 할인율: <b>${discountPct}%</b><br>• 할인가: <span style="color:#10b981">${fmt(targetProduct.price * (1 - discountPct/100), L)}</span></div>
-            <div style="display:flex;gap:.4rem">
-                <button class="btn btn-approve" onclick="execProductDiscount('${targetProduct.id}',${discountPct},this,'price')">✓ 승인 (Deploy)</button>
-                <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=color:#ef4444>✗ 취소됨</span>'">✗ 취소</button>
-            </div></div></div>`;
-            chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
-        } else if (newPrice) {
-            const diff = newPrice - targetProduct.price;
-            const pctChange = ((diff/targetProduct.price)*100).toFixed(1);
-            const aiMsg = document.createElement('div'); aiMsg.className='message ai-message';
-            aiMsg.innerHTML=`${getAgentAvatarHTML('price')}
-            <div class="bubble"><b>✅ Intent: set_standard_price()</b>
-            <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-coins"></i> set_standard_price</div>
-            <div class="ai-card-details">• product: ${targetProduct.name}<br>• 기존가: ${fmt(targetProduct.price, L)}<br>• 신규등록가: <b>${fmt(newPrice, L)}</b><br>• 변동: <span style="color:${diff>0?'#ef4444':'#10b981'}">${diff>0?'+':''}${pctChange}%</span></div>
-            <div style="display:flex;gap:.4rem">
-                <button class="btn btn-approve" onclick="execPrice('${targetProduct.id}',${newPrice},this,'price')">✓ 승인 (Deploy)</button>
-                <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=color:#ef4444>✗ 취소됨</span>'">✗ 취소</button>
-            </div></div></div>`;
-            chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
+            let aiMsg = document.createElement('div'); 
+            aiMsg.className = 'message ai-message';
+            let inner = `${getAgentAvatarHTML(currentActiveAgentId)}<div class="bubble"><b>✅ Intent: ${name}()</b>`;
+            
+            if (name === 'create_coupon') {
+                inner += `<div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-ticket-simple"></i> create_coupon</div>
+                <div class="ai-card-details">• region: ${args.region}<br>• target: ${args.category}<br>• discount: -${args.discount_pct}%</div>
+                <div style="display:flex;gap:.4rem">
+                    <button class="btn btn-approve" onclick="execDiscount('${args.region}','${args.category}',${args.discount_pct},this,'${currentActiveAgentId}')">✓ 승인 (Deploy)</button>
+                    <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=\\'color:#ef4444\\'>✗ 취소됨</span>'">✗ 취소</button>
+                </div></div>`;
+            } else if (name === 'create_bundle') {
+                inner += `<div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-boxes-stacked"></i> create_bundle</div>
+                <div class="ai-card-details">• items: ${args.items}<br>• region: ${args.region}<br>• discount: -${args.discount_pct}%</div>
+                <div style="display:flex;gap:.4rem">
+                    <button class="btn btn-approve" onclick="execBundle('${args.items}',${args.discount_pct},'${args.region}',this,'${currentActiveAgentId}')">✓ 승인 (Deploy)</button>
+                    <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=\\'color:#ef4444\\'>✗ 취소됨</span>'">✗ 취소</button>
+                </div></div>`;
+            } else if (name === 'update_discount') {
+                let targetProduct = products.find(p => p.name.toLowerCase().includes((args.product_name || '').toLowerCase().replace(/lg /g,'')));
+                if(!targetProduct) targetProduct = products[0]; 
+                inner += `<div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-tag"></i> update_discount</div>
+                <div class="ai-card-details">• product: ${targetProduct.name}<br>• 할인율: <b>${args.discount_pct}%</b><br>• 할인가: <span style="color:#10b981">${fmt(targetProduct.price * (1 - args.discount_pct/100), L)}</span></div>
+                <div style="display:flex;gap:.4rem">
+                    <button class="btn btn-approve" onclick="execProductDiscount('${targetProduct.id}',${args.discount_pct},this,'${currentActiveAgentId}')">✓ 승인 (Deploy)</button>
+                    <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=\\'color:#ef4444\\'>✗ 취소됨</span>'">✗ 취소</button>
+                </div></div>`;
+            } else if (name === 'set_standard_price') {
+                let targetProduct = products.find(p => p.name.toLowerCase().includes((args.product_name || '').toLowerCase().replace(/lg /g,'')));
+                if(!targetProduct) targetProduct = products[0];
+                const newPrice = args.new_price || 0;
+                const diff = newPrice - targetProduct.price;
+                const pctChange = ((diff/targetProduct.price)*100).toFixed(1);
+                inner += `<div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-coins"></i> set_standard_price</div>
+                <div class="ai-card-details">• product: ${targetProduct.name}<br>• 기존가: ${fmt(targetProduct.price, L)}<br>• 신규가: <b>${fmt(newPrice, L)}</b><br>• 변동: <span style="color:${diff>0?'#ef4444':'#10b981'}">${diff>0?'+':''}${pctChange}%</span></div>
+                <div style="display:flex;gap:.4rem">
+                    <button class="btn btn-approve" onclick="execPrice('${targetProduct.id}',${newPrice},this,'${currentActiveAgentId}')">✓ 승인 (Deploy)</button>
+                    <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=\\'color:#ef4444\\'>✗ 취소됨</span>'">✗ 취소</button>
+                </div></div>`;
+            } else if (name === 'change_theme') {
+                inner += `<div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-palette"></i> change_theme</div>
+                <div class="ai-card-details">• theme_name: ${args.theme_name}</div>
+                <div style="display:flex;gap:.4rem">
+                    <button class="btn btn-approve" onclick="execTheme('${args.theme_name}',this,'${currentActiveAgentId}')">✓ 승인 (Deploy)</button>
+                    <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=\\'color:#ef4444\\'>✗ 취소됨</span>'">✗ 취소</button>
+                </div></div>`;
+            } else if (name === 'deploy_country') {
+                inner += `<div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-globe"></i> deploy_country</div>
+                <div class="ai-card-details">• country_code: ${args.country_code}</div>
+                <div style="display:flex;gap:.4rem">
+                    <button class="btn btn-approve" onclick="execRollout('${args.country_code}',this,'${currentActiveAgentId}')">✓ 승인 (Deploy)</button>
+                    <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=\\'color:#ef4444\\'>✗ 취소됨</span>'">✗ 취소</button>
+                </div></div>`;
+            } else if (name === 'add_product') {
+                const pPrice = args.price || 1250000;
+                inner += `<div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-plus-circle"></i> add_product</div>
+                <div class="ai-card-details">• product_type: ${args.product_type}<br>• price: <b>${fmt(pPrice, L)}</b></div>
+                <div style="display:flex;gap:.4rem">
+                    <button class="btn btn-approve" onclick="execAddProduct('${args.product_type}', ${pPrice}, this, '${currentActiveAgentId}')">✓ 승인 (Publish)</button>
+                    <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=\\'color:#ef4444\\'>✗ 취소됨</span>'">✗ 취소</button>
+                </div></div>`;
+            } else {
+                inner += `알 수 없는명령입니다.</div>`;
+            }
+            
+            inner += `</div>`;
+            aiMsg.innerHTML = inner;
+            chatContainer.appendChild(aiMsg); 
+            chatContainer.scrollTop = chatContainer.scrollHeight;
         }
+
+    } catch(e) {
+        const tEl = document.getElementById(typingId);
+        if(tEl) tEl.remove();
+        console.error(e);
+        addMsg(`네트워크 오류가 발생했습니다. 로컬에서는 API 지원이 어려울 수 있으니 Deploy 후 확인바랍니다.`, false, 'atlas');
     }
-    // ---- Intent 4: Country Rollout ----
-    if(text.includes('사이트') || text.includes('롤아웃') || text.includes('개설') || text.includes('오픈') || text.includes('진출')){
-        let targetCode=null, targetName=null;
-        for(const [kw, code] of Object.entries(countryKeywords)){
-            if(text.toLowerCase().includes(kw)){targetCode=code; targetName=locales[code]?.region || kw; break;}
-        }
-        if(!targetCode || targetCode===currentStoreId){
-            addMsg(`국가를 명시해주세요.<br>예: <b>"스페인 사이트 개설해줘"</b><br>지원국가: 스페인, 영국, 일본, 독일, 프랑스, 브라질, 베트남`);
-            return;
-        }
-        const L=locales[targetCode];
-        const aiMsg=document.createElement('div'); aiMsg.className='message ai-message';
-        aiMsg.innerHTML=`${getAgentAvatarHTML('site')}
-        <div class="bubble"><b>✅ Intent: deploy_country()</b>
-        <div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-globe"></i> deploy_country</div>
-        <div class="ai-card-details">• target: ${L.region}<br>• domain: lg.com/${targetCode.toLowerCase()}<br>• currency: ${L.cur}<br>• language: auto-translate (AI)<br>• products: ${products.filter(p=>!p.bundleItems).length}개 상품 자동 변환<br>• estimated_time: ~30초 (기존 6개월 → AI 자동화)</div>
-        <div style="display:flex;gap:.4rem">
-            <button class="btn btn-approve" onclick="execRollout('${targetCode}',this,'site')">✓ 승인 (Deploy)</button>
-            <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=color:#ef4444>✗ 취소됨</span>'">✗ 취소</button>
-        </div></div></div>`;
-        chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
-    }
-    
-    // Fallback
-    showFallback();
 }
 
 window.switchAgent = function(id, el) {
     document.querySelectorAll('.agent-item').forEach(item => item.classList.remove('active'));
     el.classList.add('active');
+    currentActiveAgentId = id;
     
     // Change chips dynamically based on agent
     let chipsHTML = '';
@@ -693,18 +627,6 @@ sendBtn.addEventListener('click',()=>{ const v=chatInput.value.trim(); if(!v) re
 chatInput.addEventListener('keypress',e=>{ if(e.key==='Enter') sendBtn.click(); });
 
 // ==================== ATLAS CHATBOT ====================
-const csResponses = {
-    '배송': '일반적으로 주문 후 2~3 영업일 내에 배송됩니다. 대형 가전(TV, 냉장고 등)은 설치 배송으로 별도 일정이 잡힙니다.',
-    '반품': '제품 수령 후 30일 이내에 반품이 가능합니다. 개봉 후에도 제품 하자 시 무상 교환/반품 처리해 드립니다.',
-    '교환': '제품에 하자가 있는 경우, 제조일로부터 1년 이내 무상 교환이 가능합니다.',
-    '환불': '결제 취소 및 환불은 반품 접수 후 영업일 기준 3~5일 내에 원래 결제 수단으로 자동 환불됩니다.',
-    'OLED': 'LG OLED TV는 완벽한 블랙과 무한 명암비를 구현합니다. G4(갤러리형), C4(올라운더), M4(무선) 시리즈를 추천드립니다.',
-    '가격': '제품별 가격은 사이트 상품 페이지에서 확인하실 수 있습니다.',
-    '할부': 'LG전자 공식 쇼핑몰에서는 최대 36개월 무이자 할부를 지원합니다.',
-    '보증': 'LG전자 제품은 기본 1년 무상 보증이 제공됩니다.',
-    '설치': '대형 가전은 전문 설치 기사가 방문하여 무료 설치해 드립니다.'
-};
-
 const atlasChatWindow = document.getElementById('chat-window');
 const atlasChatBox = document.getElementById('chat-box');
 const atlasInputWrapper = document.getElementById('atlas-chat-input-wrapper');
