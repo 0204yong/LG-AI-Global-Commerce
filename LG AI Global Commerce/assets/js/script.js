@@ -473,16 +473,69 @@ function processIntent(text){
         </div></div></div>`;
         chatContainer.appendChild(aiMsg); chatContainer.scrollTop=chatContainer.scrollHeight; return;
     }
+    
     // Fallback
+    showFallback();
+}
+
+window.switchAgent = function(id, el) {
+    document.querySelectorAll('.agent-item').forEach(item => item.classList.remove('active'));
+    el.classList.add('active');
+    
+    // Change chips dynamically based on agent
+    let chipsHTML = '';
+    const nameMap = {
+        'atlas': 'Chief AI (Atlas)',
+        'promo': '프로모션 에이전트',
+        'price': '가격 에이전트',
+        'product': '제품 에이전트',
+        'site': '사이트 에이전트',
+        'md': 'MD 에이전트',
+        'marketing': '마케팅 에이전트'
+    };
+    
+    if(id === 'promo') {
+        chipsHTML = `
+            <button class="chip" onclick="fillChat('최고급 OLED TV와 사운드바를 20% 할인된 번들로 구성해줘')">📦 번들 시스템 마이그레이션</button>
+            <button class="chip" onclick="fillChat('OLED TV 20% 할인 쿠폰 만들어줘')">🎫 고객 타겟팅 쿠폰 배포</button>
+        `;
+    } else if(id === 'price') {
+        chipsHTML = `
+            <button class="chip" onclick="fillChat('OLED M4 15% 할인 세팅해줘')">🏷️ 실시간 탄력 할인가 배포</button>
+            <button class="chip" onclick="fillChat('OLED M4 모델 5000 파운드로 표준 가격 등록해줘')">💰 기준가 동기화</button>
+        `;
+    } else if(id === 'site') {
+        chipsHTML = `
+            <button class="chip" onclick="fillChat('스페인 사이트 개설해줘')">🌍 스페인 리전 자동 롤아웃</button>
+            <button class="chip" onclick="fillChat('블랙 프라이데이 다크 템플릿으로 바꿔줘')">🎨 전역 테마 동기화</button>
+        `;
+    } else if(id === 'product' || id === 'md' || id === 'marketing') {
+        chipsHTML = `
+            <button class="chip" onclick="fillChat('코드제로 무선청소기 신규 등록해줘')">🛍️ 신상품 마스터 생성</button>
+        `;
+    } else {
+        chipsHTML = `
+            <button class="chip" onclick="fillChat('OLED M4 15% 할인 세팅해줘')">🏷️ 퀵 액션: 할인</button>
+            <button class="chip" onclick="fillChat('스페인 사이트 개설해줘')">🌍 퀵 액션: 국가 롤아웃</button>
+        `;
+    }
+
+    addMsg(`🤖 <b>[${nameMap[id]}] 활성화됨.</b><br>해당 분야에 대한 자연어 명령을 대기 중입니다.<br>
+        <div class="suggestion-chips" style="margin-top:.5rem">
+            ${chipsHTML}
+        </div>`, false);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+};
+
+// Fallback hint update
+function showFallback() {
     setTimeout(()=>{
         addMsg(`아래 추천 명령어를 사용해 보세요:<br>
         <div class="suggestion-chips" style="margin-top:.5rem">
             <button class="chip" onclick="fillChat('OLED M4 15% 할인 세팅해줘')">🏷️ 실시간 할인 폭격</button>
             <button class="chip" onclick="fillChat('OLED M4 모델 5000 파운드로 표준 가격 등록해줘')">💰 표준 가격 등록</button>
             <button class="chip" onclick="fillChat('최고급 OLED TV와 사운드바를 20% 할인된 번들로 구성해줘')">📦 번들 자동 생성</button>
-            <button class="chip" onclick="fillChat('OLED TV 20% 할인 쿠폰 만들어줘')">🎫 할인 쿠폰 배포</button>
             <button class="chip" onclick="fillChat('스페인 사이트 개설해줘')">🌍 국가 롤아웃</button>
-            <button class="chip" onclick="fillChat('코드제로 무선청소기 신규 등록해줘')">🛍️ 신제품 생성</button>
             <button class="chip" onclick="fillChat('블랙 프라이데이 다크 템플릿으로 바꿔줘')">🎨 전역 테마 교체</button>
         </div>`);
     },500);

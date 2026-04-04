@@ -29,6 +29,36 @@
             <div class="logo"><i class="fa-solid fa-microchip"></i> LG AI <span>Admin</span></div>
             <div class="status-badge"><span class="pulse-dot"></span> Agent Active</div>
         </div>
+        <div class="agent-dashboard">
+            <div class="agent-item active" onclick="switchAgent('atlas', this)" title="Atlas (Chief AI)">
+                <div class="agent-avatar atlas-anim"><i class="fa-solid fa-robot"></i></div>
+                <span>Atlas</span>
+            </div>
+            <div class="agent-item" onclick="switchAgent('promo', this)" title="프로모션">
+                <div class="agent-avatar"><img src="assets/images/agents/promo_agent.png"></div>
+                <span>Promo</span>
+            </div>
+            <div class="agent-item" onclick="switchAgent('price', this)" title="가격">
+                <div class="agent-avatar"><img src="assets/images/agents/price_agent.png"></div>
+                <span>Price</span>
+            </div>
+            <div class="agent-item" onclick="switchAgent('product', this)" title="제품">
+                <div class="agent-avatar"><img src="assets/images/agents/product_agent.png"></div>
+                <span>Product</span>
+            </div>
+            <div class="agent-item" onclick="switchAgent('site', this)" title="사이트">
+                <div class="agent-avatar"><img src="assets/images/agents/site_agent.png"></div>
+                <span>Site</span>
+            </div>
+            <div class="agent-item" onclick="switchAgent('md', this)" title="MD">
+                <div class="agent-avatar"><img src="assets/images/agents/md_agent.png"></div>
+                <span>MD</span>
+            </div>
+            <div class="agent-item" onclick="switchAgent('marketing', this)" title="마케팅">
+                <div class="agent-avatar"><img src="assets/images/agents/marketing_agent.png"></div>
+                <span>Marketing</span>
+            </div>
+        </div>
         <div class="chat-container" id="chatContainer">
             <div class="message ai-message">
                 <div class="avatar"><i class="fa-solid fa-robot"></i></div>
