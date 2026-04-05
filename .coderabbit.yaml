@@ -1,0 +1,37 @@
+# CodeRabbit Configuration
+# https://docs.coderabbit.ai/configuration
+
+language: "ko-KR"
+
+reviews:
+  profile: "assertive"     # 적극적으로 리뷰 (chill / assertive / aggressive)
+  request_changes_workflow: true
+  high_level_summary: true
+  poem: false
+  review_status: true
+  auto_review:
+    enabled: true
+    drafts: false           # Draft PR은 리뷰 안함
+
+  path_instructions:
+    - path: "api/**"
+      instructions: |
+        이 디렉토리는 Vercel Serverless Functions입니다.
+        - Gemini API 키가 하드코딩되어 있지 않은지 확인하세요.
+        - API 요청/응답의 에러 핸들링이 충분한지 검토하세요.
+        - 토큰 사용량을 최소화하는 방향으로 리뷰하세요.
+
+    - path: "LG AI Global Commerce/assets/js/**"
+      instructions: |
+        이 디렉토리는 프론트엔드 JavaScript입니다.
+        - 전역 변수 남용 여부를 체크하세요.
+        - DOM 조작 성능 이슈 (innerHTML 반복, 불필요한 리렌더링)를 주의하세요.
+        - delegate_task 관련 무한 루프 방어 로직이 유지되는지 확인하세요.
+        - sessionHistory에 시스템 로그 형태의 문자열이 주입되지 않는지 확인하세요.
+
+    - path: "LG AI Global Commerce/assets/css/**"
+      instructions: |
+        CSS 변수 시스템(:root)과 테마(black-friday) 구조를 유지하세요.
+
+chat:
+  auto_reply: true
