@@ -71,8 +71,8 @@ export default async function handler(req, res) {
         // 1. 라우팅: Agent 타입에 따라 다른 로컬/클라우드 MCP 서버 할당
         const isCsMode = activeAgent === 'atlas_cs';
         const targetMcpHost = isCsMode 
-            ? (process.env.CS_MCP_URL || 'http://127.0.0.1:3002') 
-            : (process.env.ADMIN_MCP_URL || 'http://127.0.0.1:3001');
+            ? (process.env.CS_MCP_URL || 'https://atlas-cs-docker-mcp.onrender.com') 
+            : (process.env.ADMIN_MCP_URL || 'https://lg-admin-docker-mcp-yk.onrender.com');
 
         // 2. MCP 클라이언트 연결 확립 (Server-Sent Events)
         mcpTransport = new SSEClientTransport(new URL(`${targetMcpHost}/sse`));
