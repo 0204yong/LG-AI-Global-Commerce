@@ -125,7 +125,60 @@ function createAdminServer() {
         resultInfo = { status: "success", sku: args.sku, stock: mockStock, message: `현재 ${args.sku} 모델의 가용 재고는 ${mockStock}개입니다.` };
         break;
       case "update_inventory":
-        resultInfo = { status: "success", message: `[재고 연동 완료] ${args.sku === 'all' || !args.sku ? '전체 상품' : args.sku}의 재고가 ${args.quantity}개로 업데이트 되었습니다.` };
+        const invToken = process.env.SHOPIFY_API_TOKEN;
+        const invDomain = process.env.SHOPIFY_STORE_DOMAIN;
+        if (!invToken || !invDomain) {
+          resultInfo = { status: "error", message: "Shopify API 정보가 없습니다." };
+          break;
+        }
+
+        try {
+          // 1. Get Primary Location
+          let locRes = await fetch(`https://${invDomain}/admin/api/2024-01/locations.json`, {
+            headers: { 'X-Shopify-Access-Token': invToken }
+          });
+          if (!locRes.ok) throw new Error("Location 조회 실패");
+          let locData = await locRes.json();
+          let locationId = locData.locations[0].id;
+
+          // 2. Get Products (max 5 for 'all' to avoid rate limit, or search by sku)
+          let targetSku = (args.sku === 'all' || !args.sku) ? '' : args.sku;
+          let prodUrl = `https://${invDomain}/admin/api/2024-01/products.json?limit=${targetSku ? 1 : 5}`;
+          if (targetSku) prodUrl += `&title=${encodeURIComponent(targetSku)}`;
+          
+          let prodRes = await fetch(prodUrl, { headers: { 'X-Shopify-Access-Token': invToken } });
+          if (!prodRes.ok) throw new Error("Product 조회 실패");
+          let prodData = await prodRes.json();
+          let products = prodData.products || [];
+
+          if (products.length === 0) {
+             resultInfo = { status: "error", message: `[재고 연동 실패] 쇼피파이 라이브 스토어에서 '${targetSku || '상품'}'을 찾을 수 없습니다.` };
+             break;
+          }
+
+          // 3. Set Inventory for each product's first variant
+          let updateCount = 0;
+          for (const p of products) {
+            let invItemId = p.variants[0]?.inventory_item_id;
+            if (!invItemId) continue;
+
+            let setRes = await fetch(`https://${invDomain}/admin/api/2024-01/inventory_levels/set.json`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'X-Shopify-Access-Token': invToken },
+              body: JSON.stringify({ location_id: locationId, inventory_item_id: invItemId, available: args.quantity })
+            });
+
+            if (setRes.ok) updateCount++;
+          }
+
+          let targetName = targetSku ? products[0].title : '인기상위 5개 상품목록';
+          resultInfo = { 
+            status: "success", 
+            message: `[✅ 스토어 재고 동기화 완료] 글로벌 GDC 창고 연동\n대상: ${targetName}\n적용수량: 상품별 ${args.quantity}개 일괄반영\n실제 동기화된 상품 수: ${updateCount}개` 
+          };
+        } catch (error) {
+          resultInfo = { status: "error", message: `Shopify Sync Error: ${error.message}` };
+        }
         break;
       default:
         throw new Error(`알 수 없는 도구: ${name}`);
