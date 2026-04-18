@@ -1,4 +1,4 @@
-// ==================== DUAL BACKEND (MCP Client 통신 기반) ====================
+// ==================== 2-TIER MULTI-AGENT ARCHITECTURE (PROXY -> MASTER -> MCP) ====================
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import fetch from "node-fetch";
@@ -18,30 +18,20 @@ async function isOllamaAvailable() {
     }
 }
 
-// MCP 도구를 OpenAI 포맷으로 변환 (Ollama용)
 function convertMcpToolsToOpenAI(mcpTools) {
     if (!mcpTools || mcpTools.length === 0) return undefined;
     return mcpTools.map(tool => ({
         type: "function",
-        function: {
-            name: tool.name,
-            description: tool.description,
-            parameters: tool.inputSchema
-        }
+        function: { name: tool.name, description: tool.description, parameters: tool.inputSchema }
     }));
 }
 
-// MCP 도구를 Gemini 포맷으로 변환 (클라우드 Gemini용)
 function convertMcpToolsToGemini(mcpTools) {
     if (!mcpTools || mcpTools.length === 0) return undefined;
     return mcpTools.map(tool => ({
         name: tool.name,
         description: tool.description,
-        parameters: {
-            type: "OBJECT",
-            properties: tool.inputSchema.properties,
-            required: tool.inputSchema.required
-        }
+        parameters: { type: "OBJECT", properties: tool.inputSchema.properties, required: tool.inputSchema.required }
     }));
 }
 
@@ -67,111 +57,104 @@ export default async function handler(req, res) {
 
     try {
         const { text, activeAgent, history, storeState } = req.body;
-
-        // 1. 라우팅: Agent 타입에 따라 다른 로컬/클라우드 MCP 서버 할당
         const isCsMode = activeAgent === 'atlas_cs';
+        const apiKey = process.env.GEMINI_API_KEY;
+
+        // ==========================================
+        // TIER 1: Proxy Agent (Atlas) Logic
+        // ==========================================
+        console.log('🤖 [TIER 1] Calling Proxy Agent (Atlas)...');
+        let proxyInstruction = `당신은 LG 커머스의 친절한 프론트엔드 고객센터 챗봇 'Atlas'입니다.
+당신의 임무: 사용자가 인사를 하거나 일반적인 질문을 하면 상냥하게 직접 답변하세요.
+단, 백엔드 조작(제품 추가, 테마 변경, 재고 수정, 배포, 쿠폰 발급 등)이 필요한 시스템 명령을 내리면 'delegate_to_master' 도구를 호출하여 인트라넷 백엔드 마스터에게 결재를 올리십시오.
+현재 DB 상태: ${storeState || '정보 없음'}`;
+
+        let proxyContents = [];
+        if (history && Array.isArray(history) && history.length > 0) {
+            proxyContents = [...history, { role: "user", parts: [{ text: text }] }];
+        } else {
+            proxyContents = [{ role: "user", parts: [{ text }] }];
+        }
+
+        const proxyPayload = {
+            systemInstruction: { parts: [{ text: proxyInstruction }] },
+            contents: proxyContents,
+            tools: [{ 
+                functionDeclarations: [{
+                    name: "delegate_to_master",
+                    description: "시스템 제어나 백엔드 조작이 필요할 때 마스터 에이전트(Orchestrator)를 호출합니다.",
+                    parameters: { type: "OBJECT", properties: { exact_task: { type: "string", description: "사용자가 요청한 작업 내용 요약" } }, required: ["exact_task"] }
+                }] 
+            }],
+            toolConfig: { functionCallingConfig: { mode: "AUTO" } }
+        };
+
+        const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
+        
+        let proxyResponseRaw = await fetch(GEMINI_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(proxyPayload)
+        });
+        
+        const proxyData = await proxyResponseRaw.json();
+        if (proxyData.error) throw new Error("Tier 1 Error: " + proxyData.error.message);
+        
+        const proxyPart = proxyData.candidates?.[0]?.content?.parts?.[0];
+
+        // 만약 프록시가 직접 답변할 수 있다면 여기서 통신 종료 (마스터 불필요)
+        if (proxyPart?.text && !proxyPart?.functionCall) {
+            console.log('✅ [TIER 1] Proxy Agent handled the request directly.');
+            return res.status(200).json({ type: 'text', text: proxyPart.text });
+        }
+
+        // ==========================================
+        // TIER 2: Master Agent (Orchestrator) Logic
+        // Proxy가 권한 넘김에 동의했을 경우 실행됨
+        // ==========================================
+        let delegatedTask = text;
+        if (proxyPart?.functionCall && proxyPart.functionCall.name === 'delegate_to_master') {
+            delegatedTask = proxyPart.functionCall.args.exact_task || text;
+            console.log(`🧠 [TIER 2] Proxy requested Master processing for: ${delegatedTask}`);
+        } else {
+            console.log(`🧠 [TIER 2] Escaping to Master logic...`);
+        }
+
+        // MCP 연결 
         const targetMcpHost = isCsMode 
             ? (process.env.CS_MCP_URL || 'https://atlas-cs-docker-mcp.onrender.com') 
             : (process.env.ADMIN_MCP_URL || 'https://lg-admin-docker-mcp-yk.onrender.com');
 
-        // 2. MCP 클라이언트 연결 확립 (Server-Sent Events)
         mcpTransport = new SSEClientTransport(new URL(`${targetMcpHost}/sse`));
-        mcpClient = new Client({ name: "lg-api-gateway", version: "1.0.0" }, { capabilities: {} });
+        mcpClient = new Client({ name: "lg-master-orchestrator", version: "1.2.0" }, { capabilities: {} });
         await mcpClient.connect(mcpTransport);
-
-        // 3. MCP 서버로부터 동적 지원 도구 목록(Tools) 스크랩핑
         const toolsResult = await mcpClient.listTools();
         const availableMcpTools = toolsResult.tools;
 
-        // 4. 프롬프트 세팅
-        let systemInstruction = "";
-        if (isCsMode) {
-            systemInstruction = "당신은 LG 커머스의 고객센터를 전담하는 'Atlas CS 챗봇'입니다. 사용자들에게 매우 친절하고 상냥하게 존댓말로 응대하세요. 배송 상태, 환불 문의 시 반드시 제공된 도구를 사용하십시오.";
-        } else {
-            systemInstruction = `당신은 LG 글로벌 커머스의 수석 안내원(Admin)입니다. 현재 활성 에이전트 분과는 [${activeAgent}]입니다. 
-            [중요 지침: 본인이 직접 정보를 가공하기 보다는, 사용자 요청을 분석하여 즉시 도구(Tool Call)를 사용해 응답해주세요. 오류나 거절을 최소화하세요.]`;
-        }
+        const masterInstruction = `당신은 LG 커머스의 백엔드 시스템을 통제하는 마스터 오케스트레이터(Antigravity Persona)입니다. 프론트엔드 에이전트로부터 다음 업무를 위임 받았습니다: "${delegatedTask}"
+당신은 모든 MCP 권한에 접근할 수 있습니다. 위임받은 업무를 달성하기 위해 가장 적절한 도구(Tool)를 즉시 실행하세요. 직접 텍스트로 대답하지 마세요.`;
 
-        if (storeState) {
-            systemInstruction += `\n\n[현재 DB(상품) 상태 요약]\n${storeState}\n\n* 당신은 이 상품 DB를 인지하고 있습니다. 능동적으로 활용하세요.`;
-        }
+        const masterPayload = {
+            systemInstruction: { parts: [{ text: masterInstruction }] },
+            contents: [{ role: "user", parts: [{ text: delegatedTask }] }],
+            tools: [{ functionDeclarations: convertMcpToolsToGemini(availableMcpTools) }],
+            toolConfig: { functionCallingConfig: { mode: "ANY" } } // 무조건 도구를 쓰도록 강제
+        };
 
-        const useLocal = process.env.USE_LOCAL_LLM === 'true';
-        let isToolCalled = false;
-        let toolCallObj = null;
-        let textResult = null;
+        let masterResponseRaw = await fetch(GEMINI_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(masterPayload)
+        });
 
-        // 5. LLM 질의 (Dual Backend)
-        if (useLocal && await isOllamaAvailable()) {
-            // Ollama 호출
-            console.log('🔒 [LOCAL] Gemma4 via Ollama with MCP');
-            const messages = convertHistoryToMessages(systemInstruction, history, text);
-            const ollamaPayload = {
-                model: OLLAMA_MODEL,
-                messages,
-                stream: false,
-                options: { temperature: 0.7, num_predict: 1024 }
-            };
-            if (availableMcpTools.length > 0) ollamaPayload.tools = convertMcpToolsToOpenAI(availableMcpTools);
+        const masterData = await masterResponseRaw.json();
+        if (masterData.error) throw new Error("Tier 2 Error: " + masterData.error.message);
+        const masterPart = masterData.candidates?.[0]?.content?.parts?.[0];
 
-            const response = await fetch(`${OLLAMA_URL}/api/chat`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(ollamaPayload)
-            });
-            const data = await response.json();
-            
-            if (data.message?.tool_calls && data.message.tool_calls.length > 0) {
-                isToolCalled = true;
-                const tc = data.message.tool_calls[0];
-                toolCallObj = { name: tc.function.name, args: tc.function.arguments };
-            } else if (data.message?.content) {
-                textResult = data.message.content;
-            }
-        } else {
-            // Gemini 클라우드 호출
-            console.log('☁️ [CLOUD] Gemini API with MCP');
-            const apiKey = process.env.GEMINI_API_KEY;
-            
-            let geminiContents = [];
-            if (history && Array.isArray(history) && history.length > 0) {
-                geminiContents = [...history, { role: "user", parts: [{ text: text }] }];
-            } else {
-                geminiContents = [{ role: "user", parts: [{ text }] }];
-            }
-
-            const geminiPayload = {
-                systemInstruction: { parts: [{ text: systemInstruction }] },
-                contents: geminiContents
-            };
-
-            if (availableMcpTools.length > 0) {
-                geminiPayload.tools = [{ functionDeclarations: convertMcpToolsToGemini(availableMcpTools) }];
-                geminiPayload.toolConfig = { functionCallingConfig: { mode: "AUTO" } };
-            }
-
-            const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
-            const response = await fetch(GEMINI_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(geminiPayload)
-            });
-            const data = await response.json();
-            
-            if (data.error) throw new Error(data.error.message);
-            const part = data.candidates?.[0]?.content?.parts?.[0];
-
-            if (part?.functionCall) {
-                isToolCalled = true;
-                toolCallObj = { name: part.functionCall.name, args: part.functionCall.args };
-            } else if (part?.text) {
-                textResult = part.text;
-            }
-        }
-
-        // 6. MCP 도구 실행 (원격 3001/3002 서버 강제 호출)
-        if (isToolCalled) {
-            console.log(`[MCP Router] Executing tool ${toolCallObj.name} on ${targetMcpHost}`);
+        // 3. MCP 도구 실행 (원격 3001/3002 서버 강제 호출)
+        if (masterPart?.functionCall) {
+            const toolCallObj = { name: masterPart.functionCall.name, args: masterPart.functionCall.args };
+            console.log(`[MCP Router] Master Agent delegating execution to MCP: ${toolCallObj.name}`);
             
             const toolExecutionResult = await mcpClient.callTool({
                 name: toolCallObj.name,
@@ -195,8 +178,7 @@ export default async function handler(req, res) {
             });
         }
 
-        if (textResult) return res.status(200).json({ type: 'text', text: textResult });
-        return res.status(200).json({ type: 'text', text: "이해하지 못했습니다. 다시 말씀해주세요." });
+        return res.status(200).json({ type: 'text', text: "시스템 통제권 결재 중 오류가 발생했습니다. 나중에 다시 시도해주세요." });
 
     } catch (e) {
         console.error(e);
