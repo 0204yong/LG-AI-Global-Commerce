@@ -3,6 +3,7 @@ import cors from "cors";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
+import "dotenv/config";
 
 function createAdminServer() {
   const server = new Server(
@@ -46,7 +47,56 @@ function createAdminServer() {
         resultInfo = { status: "success", message: `테마가 [${args.themeId}] / [${args.color_mode}] 모드로 변경 준비 완료되었습니다.` };
         break;
       case "add_product":
-        resultInfo = { status: "success", productId: `product_${Date.now()}`, productName: args.name, price: args.price, message: `새 제품 [${args.name}] 목록 등록 완료` };
+        const shopifyToken = process.env.SHOPIFY_API_TOKEN;
+        const shopDomain = process.env.SHOPIFY_STORE_DOMAIN;
+        
+        if (!shopifyToken || !shopDomain) {
+          resultInfo = { status: "error", message: "Shopify API 정보가 서버 환경변수에 설정되지 않았습니다." };
+          break;
+        }
+
+        const endpoint = `https://${shopDomain}/admin/api/2024-01/products.json`;
+        console.log(`Sending add_product request to Shopify: ${endpoint}`);
+        
+        try {
+          // Native Node 18+ Fetch API
+          const shopifyRes = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Shopify-Access-Token': shopifyToken
+            },
+            body: JSON.stringify({
+              product: {
+                title: args.name,
+                product_type: args.category,
+                vendor: "LG AI",
+                variants: [
+                  {
+                    price: args.price.toString(),
+                    requires_shipping: true
+                  }
+                ],
+                status: "active"
+              }
+            })
+          });
+
+          const data = await shopifyRes.json();
+          if (!shopifyRes.ok) {
+            console.error("Shopify error:", data);
+            throw new Error(`Shopify API Error: ${JSON.stringify(data.errors || data)}`);
+          }
+
+          resultInfo = { 
+            status: "success", 
+            productId: data.product.id, 
+            productName: data.product.title, 
+            message: `[✅ 스토어 연동 완료] 쇼피파이 라이브 스토어에 새 제품 '${data.product.title}' 등록 성공!` 
+          };
+        } catch (error) {
+          resultInfo = { status: "error", message: error.message };
+        }
         break;
       case "create_coupon":
         resultInfo = { status: "success", message: `카테고리 [${args.category}]에 ${args.discount_pct}% 쿠폰 캠페인 생성됨` };
