@@ -3,6 +3,8 @@ let currentStoreId = 'UK';
 let activeFilter = 'all';
 let cart = [];
 let currentModalProduct = null;
+let sessionHistory = [];
+let delegateDepth = 0; // [감사#1] delegate 무한루프 방어 카운터
 
 // Products are loaded from data.js
 
@@ -84,7 +86,7 @@ function renderStore(){
     document.getElementById('promo2').textContent = L.p2;
     document.getElementById('promo3').textContent = L.p3;
     const filtered = activeFilter==='all' ? products : products.filter(p=>p.cat===activeFilter);
-    productGrid.innerHTML='';
+    const fragment = document.createDocumentFragment(); // [감사#3] DocumentFragment로 일괄 추가
     filtered.forEach(p=>{
         const fp = fmt(p.price, L);
         let badge='', orig='', displayPrice=fp;
@@ -100,9 +102,10 @@ function renderStore(){
                 `<div class="bundle-thumb"><img src="${bi.img}" alt="${bi.name}"><span class="bundle-thumb-name">${bi.name.split(' ').slice(-1)[0]}</span></div>` +
                 (idx < p.bundleItems.length-1 ? '<span class="bundle-plus">+</span>' : '')
             ).join('');
-            productGrid.innerHTML+=`
-            <div class="product-card bundle-card" onclick="openModal('${p.id}')">
-                ${badge}
+            const card = document.createElement('div');
+            card.className = 'product-card bundle-card';
+            card.onclick = () => openModal(p.id);
+            card.innerHTML = `${badge}
                 <div class="bundle-img-grid">${imgGrid}</div>
                 <div class="pc-body">
                     <div class="pc-cat"><i class="fa-solid fa-boxes-stacked"></i> BUNDLE DEAL</div>
@@ -113,12 +116,13 @@ function renderStore(){
                     <button class="pc-buy" onclick="event.stopPropagation();addToCart('${p.id}')">
                         <i class="fa-solid fa-cart-plus"></i> ${L.buy}
                     </button>
-                </div>
-            </div>`;
+                </div>`;
+            fragment.appendChild(card);
         } else {
-            productGrid.innerHTML+=`
-            <div class="product-card" onclick="openModal('${p.id}')">
-                <div class="pc-img">${badge}<img src="${p.img}" alt="${p.name}"></div>
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.onclick = () => openModal(p.id);
+            card.innerHTML = `<div class="pc-img">${badge}<img src="${p.img}" alt="${p.name}" loading="lazy"></div>
                 <div class="pc-body">
                     <div class="pc-cat">${p.cat}</div>
                     <div class="pc-name">${p.name}</div>
@@ -128,10 +132,12 @@ function renderStore(){
                     <button class="pc-buy" onclick="event.stopPropagation();addToCart('${p.id}')">
                         <i class="fa-solid fa-cart-plus"></i> ${L.buy}
                     </button>
-                </div>
-            </div>`;
+                </div>`;
+            fragment.appendChild(card);
         }
     });
+    productGrid.innerHTML = ''; // [감사#3] 한번에 교체
+    productGrid.appendChild(fragment);
 }
 function fmt(val,L){ return L.cur + Math.floor(val*L.rate).toLocaleString(); }
 function getPrice(p){ return p.discount ? p.price*(1-p.discount/100) : p.price; }
@@ -343,7 +349,25 @@ async function processIntent(text){
     chatContainer.scrollTop = chatContainer.scrollHeight;
 
     try {
-        const payload = { text, activeAgent: currentActiveAgentId };
+        // [감사#7] 체인 프롬프트는 히스토리에 저장하지 않음
+        const isChainPrompt = text.startsWith('[시스템 자동 전달]');
+        if (!isChainPrompt) {
+            sessionHistory.push({ role: 'user', parts: [{ text }] });
+        }
+        if (sessionHistory.length > 6) {
+            sessionHistory = sessionHistory.slice(sessionHistory.length - 6);
+        }
+
+        // [감사#4] 도구가 필요한 에이전트만 상품 DB 전송 (토큰 절약)
+        const toolAgents = ['atlas','price','promo','product','md'];
+        let storeState = null;
+        if (toolAgents.includes(currentActiveAgentId)) {
+            storeState = products.map(p => 
+                `${p.id}|${p.name}|${p.cat}|${p.bundleItems?'B':'S'}|${p.discount?'-'+p.discount+'%':''}`
+            ).join('\n');
+        }
+
+        const payload = { text, activeAgent: currentActiveAgentId, history: sessionHistory, storeState };
         const res = await fetch('/api/gemini', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -360,9 +384,19 @@ async function processIntent(text){
         }
 
         if (data.type === 'text') {
+            sessionHistory.push({ role: 'model', parts: [{ text: data.text }] });
             addMsg(data.text, false, currentActiveAgentId);
         } else if (data.type === 'function_call') {
-            const { name, args } = data;
+            const { args } = data;
+            const name = data.name.trim(); // 앵무새 오류 방지를 위해 trim() 적용
+            
+            // 시스템 로그 앵무새 방지: 자연어로 문맥 기억
+            if(name === 'delegate_task') {
+                sessionHistory.push({ role: 'model', parts: [{ text: `네, ${args.target_agent} 담당자에게 해당 업무를 즉시 이관하겠습니다.` }] });
+            } else {
+                sessionHistory.push({ role: 'model', parts: [{ text: `요청하신 ${name} 작업을 처리하기 위해 화면에 실행 카드를 띄웠습니다.` }] });
+            }
+
             const L = locales[currentStoreId] || locales.KR;
 
             let aiMsg = document.createElement('div'); 
@@ -426,6 +460,30 @@ async function processIntent(text){
                     <button class="btn btn-approve" onclick="execAddProduct('${args.product_type}', ${pPrice}, this, '${currentActiveAgentId}')">✓ 승인 (Publish)</button>
                     <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=\\'color:#ef4444\\'>✗ 취소됨</span>'">✗ 취소</button>
                 </div></div>`;
+            } else if (name === 'reorder_catalog') {
+                inner += `<div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-list-ol"></i> reorder_catalog</div>
+                <div class="ai-card-details">• target_type: ${args.target_type}<br>이 카테고리의 상품을 최상단으로 끌어올립니다.</div>
+                <div style="display:flex;gap:.4rem">
+                    <button class="btn btn-approve" onclick="execReorder('${args.target_type}', this, '${currentActiveAgentId}')">✓ 승인 (진열 변경)</button>
+                    <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=\\'color:#ef4444\\'>✗ 취소됨</span>'">✗ 취소</button>
+                </div></div>`;
+            } else if (name === 'delegate_task') {
+                const targetAgent = args.target_agent.toLowerCase();
+                inner += `<div class="ai-card" style="border-left-color: #f59e0b;"><div class="ai-card-title"><i class="fa-solid fa-handshake-angle"></i> 업무 이관 (Delegate)</div>
+                <div class="ai-card-details">해당 업무를 관련 부서로 이관 중입니다...<br>• 타겟 분과: <b>${targetAgent.toUpperCase()}</b><br>• 전달 사항: "${args.task_description}"</div>
+                </div>`;
+                
+                // [감사#1] 무한 위임 루프 방어
+                if (delegateDepth >= 2) {
+                    addMsg(`⚠️ 위임 체인이 최대 깊이(2회)에 도달했습니다. 추가 위임을 중단합니다.`, false, currentActiveAgentId);
+                } else {
+                    delegateDepth++;
+                    setTimeout(() => {
+                        switchAgent(targetAgent);
+                        const chainPrompt = `[시스템 자동 전달] 타 에이전트로부터 업무가 이관되었습니다. 지시사항: "${args.task_description}". 사용자를 향해 짧게 인수인계 인사 후, 즉시 당신의 도구(Tool)를 호출하여 작업을 완료하세요.`;
+                        processIntent(chainPrompt);
+                    }, 1500);
+                }
             } else {
                 inner += `알 수 없는명령입니다.</div>`;
             }
@@ -446,7 +504,13 @@ async function processIntent(text){
 
 window.switchAgent = function(id, el) {
     document.querySelectorAll('.agent-item').forEach(item => item.classList.remove('active'));
-    el.classList.add('active');
+    
+    // 자동 스위칭(el이 없는 경우) DOM에서 타겟 엘리먼트 수동 찾기
+    if(!el) {
+        el = Array.from(document.querySelectorAll('.agent-item')).find(item => item.getAttribute('onclick').includes(`'${id}'`));
+    }
+    if(el) el.classList.add('active');
+    
     currentActiveAgentId = id;
     
     // Change chips dynamically based on agent
@@ -479,6 +543,7 @@ window.switchAgent = function(id, el) {
     } else if(id === 'product' || id === 'md' || id === 'marketing') {
         chipsHTML = `
             <button class="chip" onclick="fillChat('코드제로 무선청소기 신규 등록해줘')">🛍️ 신상품 마스터 생성</button>
+            <button class="chip" onclick="fillChat('묶음 상품들을 맨 첫줄에 리스트해줘')">⭐ 번들 상품 상단 진열</button>
         `;
     } else {
         chipsHTML = `
@@ -529,6 +594,7 @@ window.execProductDiscount = function(id, disc, btn, agentId){
 
 
 // ==================== NEW INTENT EXECS ====================
+
 window.execTheme = function(themeId, btn, agentId){
     document.body.classList.add('black-friday');
     document.getElementById('promo1').textContent = 'BLACK FRIDAY SALE';
@@ -623,7 +689,34 @@ window.execBundle = function(itemIds,discRate,region,btn,agentId){
     renderStore(); document.querySelector('.product-section').scrollIntoView({behavior:'smooth'});
 };
 
-sendBtn.addEventListener('click',()=>{ const v=chatInput.value.trim(); if(!v) return; addMsg(v,true); chatInput.value=''; setTimeout(()=>processIntent(v),600); });
+// [감사#2] execReorder 통합 (중복 제거)
+window.execReorder = function(targetType, btn, agentId){
+    const type = targetType.toLowerCase();
+    
+    if (type.includes('bundle') || type.includes('묶음')) {
+        const bundles = products.filter(p => p.bundleItems);
+        const nonBundles = products.filter(p => !p.bundleItems);
+        products.length = 0;
+        products.push(...bundles, ...nonBundles);
+    } else if (type.includes('new') || type.includes('신상')) {
+        const news = products.filter(p => p.isNew);
+        const olds = products.filter(p => !p.isNew);
+        products.length = 0;
+        products.push(...news, ...olds);
+    } else {
+        // 기타: 할인율 높은 순으로 정렬
+        products.sort((a, b) => (b.discount||0) - (a.discount||0));
+    }
+
+    btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 진열 순서 변경 완료</span>';
+    addMsg(`✅ <b>진열 순서 재전개 완료!</b><br>요청하신 <b>${targetType}</b> 조건에 맞는 상품들이 스토어 최상단으로 끌어올려졌습니다. 우측 스토어 상단을 확인해 보세요!`, false, agentId);
+    activeFilter='all'; document.querySelectorAll('.gnb-link').forEach(l=>l.classList.remove('active'));
+    document.querySelector('[data-cat="all"]').classList.add('active');
+    renderStore();
+    document.getElementById('storePane').scrollTo({top:0,behavior:'smooth'});
+};
+
+sendBtn.addEventListener('click',()=>{ const v=chatInput.value.trim(); if(!v) return; delegateDepth=0; addMsg(v,true); chatInput.value=''; setTimeout(()=>processIntent(v),600); }); // [감사#1] 새 대화 시작 시 delegateDepth 초기화
 chatInput.addEventListener('keypress',e=>{ if(e.key==='Enter') sendBtn.click(); });
 
 // ==================== ATLAS CHATBOT ====================
@@ -634,6 +727,81 @@ const atlasUserInput = atlasInputWrapper ? atlasInputWrapper.querySelector('#use
 const atlasSendBtn = atlasInputWrapper ? atlasInputWrapper.querySelector('#send-btn') : null;
 const atlasCanvas = document.getElementById('atlasCanvas');
 const atlasCtx = atlasCanvas ? atlasCanvas.getContext('2d') : null;
+
+// CS 채팅 버블 추가용 헬퍼 함수
+function addCsMsg(text, isUser=false) {
+    const d=document.createElement('div');
+    d.className=`msg ${isUser ? 'user-msg' : 'bot-msg'}`;
+    d.innerHTML = text;
+    if(atlasChatBox) {
+        atlasChatBox.appendChild(d);
+        atlasChatBox.scrollTop = atlasChatBox.scrollHeight;
+    }
+}
+
+// CS 봇 MCP 연동 메인 프로세스
+let csHistory = [];
+async function processCSIntent(text) {
+    const typingId = 'cstyping_' + Date.now();
+    addCsMsg(`<i class="fa-solid fa-circle-notch fa-spin"></i> 분석 중...`, false);
+    const typingEl = atlasChatBox.lastChild;
+
+    try {
+        csHistory.push({ role: 'user', parts: [{ text }] });
+        if (csHistory.length > 6) csHistory = csHistory.slice(-6);
+
+        const payload = { text, activeAgent: 'atlas_cs', history: csHistory };
+        const res = await fetch('/api/gemini', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        
+        typingEl.remove();
+
+        if (data.error) {
+            addCsMsg(`오류: MCP 통신 불가 (${data.error})`, false);
+            return;
+        }
+
+        if (data.type === 'text') {
+            csHistory.push({ role: 'model', parts: [{ text: data.text }] });
+            addCsMsg(data.text, false);
+        } else if (data.type === 'function_call') {
+            // MCP 도구 실행 결과(ExecutionResult)가 함께 반환됨!
+            const resultObj = data.executionResult || {};
+            const resultMsg = resultObj.message || `[${data.name}] 처리 완료`;
+            
+            csHistory.push({ role: 'model', parts: [{ text: resultMsg }] });
+            
+            // 아름다운 UI 포맷팅
+            const styledHtml = `<div style="background:#0a0a0a; border:1px solid #333; padding:10px; border-radius:6px; margin-top:5px;">
+                <div style="font-size:0.7rem; color:#888; margin-bottom:5px;">⚙️ MCP Tool Execution: ${data.name}</div>
+                <div style="color:#10b981;">${resultMsg}</div>
+            </div>`;
+            addCsMsg(styledHtml, false);
+        }
+
+    } catch(e) {
+        typingEl.remove();
+        console.error(e);
+        addCsMsg(`연결 장애: ${e.message}`, false);
+    }
+}
+
+if(atlasSendBtn && atlasUserInput) {
+    atlasSendBtn.addEventListener('click', () => { 
+        const v = atlasUserInput.value.trim(); 
+        if(!v) return; 
+        addCsMsg(v, true); 
+        atlasUserInput.value=''; 
+        isSpeaking = true;
+        setTimeout(() => processCSIntent(v), 300); 
+        setTimeout(() => isSpeaking = false, 3000); // 임시 입모양 플래그
+    });
+    atlasUserInput.addEventListener('keypress', e => { if(e.key === 'Enter') atlasSendBtn.click(); });
+}
 
 let isSpeaking = false;
 let atlasFrame = 0;
@@ -798,7 +966,12 @@ function drawAtlas() {
     drawLimb(bodyX - 14, bodyY + 25, 2, false, false);
     drawLimb(bodyX - 22, bodyY - 10, armSwing, false, true);
 
-    requestAnimationFrame(drawAtlas);
+    // [감사#6] 뷰포트에 보일 때만 애니메이션 계속
+    if (widgetContainer && widgetContainer.offsetParent !== null) {
+        requestAnimationFrame(drawAtlas);
+    } else {
+        setTimeout(() => requestAnimationFrame(drawAtlas), 1000); // 숨겨진 상태면 1초 간격으로 체크
+    }
 }
 
 window.toggleChat = function() {

@@ -1,0 +1,17 @@
+{
+  "globalShortcut": "CmdOrCtrl+Shift+L",
+  "mcpServers": {
+    "lg-admin-mcp": {
+      "command": "node",
+      "args": [
+        "C:\\AIproject\\mcp-servers\\lg-admin\\index.js"
+      ]
+    },
+    "atlas-cs-mcp": {
+      "command": "node",
+      "args": [
+        "C:\\AIproject\\mcp-servers\\atlas-cs\\index.js"
+      ]
+    }
+  }
+}

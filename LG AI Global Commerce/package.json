@@ -12,7 +12,15 @@
     "type": "git",
     "url": "https://github.com/0204yong/AI-Demo.git"
   },
-  "keywords": ["ai", "commerce", "pwa", "lg"],
+  "keywords": [
+    "ai",
+    "commerce",
+    "pwa",
+    "lg"
+  ],
   "author": "0204yong",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0"
+  }
 }

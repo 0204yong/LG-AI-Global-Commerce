@@ -36,6 +36,16 @@ def _init_claude(model_name: str) -> BaseChatModel | None:
     return ChatAnthropic(model=model_name, anthropic_api_key=key, streaming=True)
 
 
+def _init_ollama(model_name: str) -> BaseChatModel | None:
+    try:
+        from langchain_ollama import ChatOllama
+        # 로컬 환경에서 구동되는 Ollama 연결 (기본 URL: http://localhost:11434)
+        return ChatOllama(model=model_name)
+    except Exception as e:
+        print(f"Ollama 모델 에러: {e}")
+        return None
+
+
 # 모델 레지스트리
 MODEL_REGISTRY: Dict[str, dict] = {
     "gpt-4o": {
@@ -79,6 +89,12 @@ MODEL_REGISTRY: Dict[str, dict] = {
         "provider": "Anthropic",
         "init": lambda: _init_claude("claude-3-5-haiku-latest"),
         "icon": "🟠"
+    },
+    "gemma4:e4b": {
+        "name": "Local Gemma 4",
+        "provider": "Ollama",
+        "init": lambda: _init_ollama("gemma4:e4b"),
+        "icon": "🔒"
     },
 }
 
