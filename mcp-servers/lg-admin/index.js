@@ -35,8 +35,13 @@ function createAdminServer() {
           inputSchema: { type: "object", properties: { country_code: { type: "string" } }, required: ["country_code"] }
         },
         {
+          name: "check_inventory",
+          description: "특정 상품(SKU)의 현재 재고 수량을 조회합니다.",
+          inputSchema: { type: "object", properties: { sku: { type: "string" } }, required: ["sku"] }
+        },
+        {
           name: "update_inventory",
-          description: "상품의 재고 수량을 즉시 업데이트합니다. 특정 상품이 지정되지 않고 전체에 적용하려면 sku에 'all'을 사용하세요.",
+          description: "상품의 재고를 갱신합니다. 기존 재고 수량을 '변경'하거나, 재고를 '등록', '추가', '입고'해달라는 모든 명령에 이 함수를 사용하세요. (전체 적용 시 sku에 'all' 입력)",
           inputSchema: { type: "object", properties: { sku: { type: "string" }, quantity: { type: "number" } }, required: ["sku", "quantity"] }
         }
       ]
@@ -113,6 +118,11 @@ function createAdminServer() {
         break;
       case "deploy_country":
         resultInfo = { status: "success", deployUrl: `https://lg.com/${args.country_code.toLowerCase()}`, message: `국가 [${args.country_code}] 리전 롤아웃이 완료되었습니다.` };
+        break;
+      case "check_inventory":
+        // Demo mock logic for random inventory
+        const mockStock = Math.floor(Math.random() * 50) + 1;
+        resultInfo = { status: "success", sku: args.sku, stock: mockStock, message: `현재 ${args.sku} 모델의 가용 재고는 ${mockStock}개입니다.` };
         break;
       case "update_inventory":
         resultInfo = { status: "success", message: `[재고 연동 완료] ${args.sku === 'all' || !args.sku ? '전체 상품' : args.sku}의 재고가 ${args.quantity}개로 업데이트 되었습니다.` };
