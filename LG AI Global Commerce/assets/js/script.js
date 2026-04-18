@@ -454,10 +454,12 @@ async function processIntent(text){
                 </div></div>`;
             } else if (name === 'add_product') {
                 const pPrice = args.price || 1250000;
+                const pName = args.name || 'LG 신제품';
+                const pCat = args.category || 'Appliance';
                 inner += `<div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-plus-circle"></i> add_product</div>
-                <div class="ai-card-details">• product_type: ${args.product_type}<br>• price: <b>${fmt(pPrice, L)}</b></div>
+                <div class="ai-card-details">• product_name: <b>${pName}</b><br>• price: <b>${fmt(pPrice, L)}</b></div>
                 <div style="display:flex;gap:.4rem">
-                    <button class="btn btn-approve" onclick="execAddProduct('${args.product_type}', ${pPrice}, this, '${currentActiveAgentId}')">✓ 승인 (Publish)</button>
+                    <button class="btn btn-approve" onclick="execAddProduct('${pName}', '${pCat}', ${pPrice}, this, '${currentActiveAgentId}')">✓ 승인 (Publish)</button>
                     <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=\\'color:#ef4444\\'>✗ 취소됨</span>'">✗ 취소</button>
                 </div></div>`;
             } else if (name === 'reorder_catalog') {
@@ -611,12 +613,16 @@ window.execTheme = function(themeId, btn, agentId){
     renderStore(); document.getElementById('storePane').scrollTo({top:0,behavior:'smooth'});
 };
 
-window.execAddProduct = function(type, price, btn, agentId){
-    const newItem = { id:'vac_'+Date.now(), cat:'Appliance', name:'LG 코드제로 오브제컬렉션 A9S', model:'AU9990', price:price, img:'assets/images/products/vacuum.jpg', desc:'더 강력해진 흡입력과 AI 기반의 스마트 청정 스테이션을 경험하세요.', isNew:true };
-    // placeholder image using washer.png
+window.execAddProduct = function(pName, pCat, price, btn, agentId){
+    let imgPath = 'assets/images/products/fridge.png';
+    if((pName||'').includes('코드제로') || (pName||'').includes('청소기')) imgPath = 'assets/images/products/vacuum.jpg';
+    if((pName||'').includes('디오스') || (pName||'').includes('매직스페이스')) imgPath = 'assets/images/products/instaview_real.png';
+    if((pName||'').includes('OLED') || (pName||'').includes('TV')) imgPath = 'assets/images/products/oled_tv_real.png';
+    
+    const newItem = { id:'prod_'+Date.now(), cat:pCat, name:pName, model:'NEW-2026', price:price, img:imgPath, desc:'LG의 최신 혁신 기술이 적용된 프리미엄 모델입니다.', isNew:true };
     products.unshift(newItem);
     btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 제품 등록 완료</span>';
-    addMsg(`✅ <b>신제품 등록 완료!</b><br>🛍️ LG 코드제로 오브제컬렉션 A9S<br>스토어 상단에 즉시 노출되었습니다.`, false, agentId);
+    addMsg(`✅ <b>신제품 등록 완료!</b><br>🛍️ ${pName}<br>스토어 상단에 즉시 노출되었습니다.`, false, agentId);
     activeFilter='all'; document.querySelectorAll('.gnb-link').forEach(l=>l.classList.remove('active'));
     document.querySelector('[data-cat="all"]').classList.add('active');
     renderStore(); document.querySelector('.product-section').scrollIntoView({behavior:'smooth'});

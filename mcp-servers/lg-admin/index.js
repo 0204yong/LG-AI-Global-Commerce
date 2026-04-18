@@ -77,6 +77,11 @@ function createAdminServer() {
                     requires_shipping: true
                   }
                 ],
+                images: [
+                  {
+                    src: args.name.includes("디오스") ? "https://lg-ai-commerce-demo.vercel.app/assets/images/products/instaview_real.png" : "https://lg-ai-commerce-demo.vercel.app/assets/images/products/washer.png"
+                  }
+                ],
                 status: "active"
               }
             })
