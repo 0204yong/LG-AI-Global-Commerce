@@ -1161,4 +1161,10 @@ if(resizer && adminPane) {
 }
 
 // ==================== INIT ====================
+
+window.execUpdateInventory = function(target, qty, btn, agentId) {
+    btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 재고 업데이트 완료</span>';
+    addMsg(`🚚 <b>재고 업데이트 완료!</b><br>대상: ${target === 'all' ? '전체 상품' : target}<br>반영 수량: ${qty}개<br>글로벌 배송 창고(GDC) 및 쇼피파이 DB에 연동되었습니다.`, false, agentId);
+};
+
 renderStore();
