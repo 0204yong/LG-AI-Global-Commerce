@@ -452,6 +452,15 @@ async function processIntent(text){
                     <button class="btn btn-approve" onclick="execRollout('${args.country_code}',this,'${currentActiveAgentId}')">✓ 승인 (Deploy)</button>
                     <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=\\'color:#ef4444\\'>✗ 취소됨</span>'">✗ 취소</button>
                 </div></div>`;
+            } else if (name === 'update_inventory') {
+                const target = args.sku || '전체 상품';
+                const qty = args.quantity || 5;
+                inner += `<div class="ai-card"><div class="ai-card-title"><i class="fa-solid fa-boxes-stacked"></i> update_inventory</div>
+                <div class="ai-card-details">• target: <b>${target}</b><br>• quantity: <b>${qty} EA</b></div>
+                <div style="display:flex;gap:.4rem">
+                    <button class="btn btn-approve" onclick="execUpdateInventory('${target}', ${qty}, this, '${currentActiveAgentId}')">✓ 승인 (Update)</button>
+                    <button class="btn btn-reject" onclick="this.parentElement.parentElement.innerHTML='<span style=\\'color:#ef4444\\'>✗ 취소됨</span>'">✗ 취소</button>
+                </div></div>`;
             } else if (name === 'add_product') {
                 const pPrice = args.price || 1250000;
                 const pName = args.name || 'LG 신제품';

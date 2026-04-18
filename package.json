@@ -2,6 +2,8 @@
   "type": "module",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "puppeteer": "^24.41.0",
+    "puppeteer-core": "^24.41.0"
   }
 }
