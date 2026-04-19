@@ -623,18 +623,19 @@ window.execTheme = function(themeId, btn, agentId){
 };
 
 window.execAddProduct = function(pName, pCat, price, btn, agentId){
-    let imgPath = 'assets/images/products/fridge.png';
-    if((pName||'').includes('코드제로') || (pName||'').includes('청소기')) imgPath = 'assets/images/products/vacuum.jpg';
-    if((pName||'').includes('디오스') || (pName||'').includes('매직스페이스')) imgPath = 'assets/images/products/instaview_real.png';
-    if((pName||'').includes('OLED') || (pName||'').includes('TV')) imgPath = 'assets/images/products/oled_tv_real.png';
-    
-    const newItem = { id:'prod_'+Date.now(), cat:pCat, name:pName, model:'NEW-2026', price:price, img:imgPath, desc:'LG의 최신 혁신 기술이 적용된 프리미엄 모델입니다.', isNew:true };
-    products.unshift(newItem);
-    btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 제품 등록 완료</span>';
-    addMsg(`✅ <b>신제품 등록 완료!</b><br>🛍️ ${pName}<br>스토어 상단에 즉시 노출되었습니다.`, false, agentId);
-    activeFilter='all'; document.querySelectorAll('.gnb-link').forEach(l=>l.classList.remove('active'));
-    document.querySelector('[data-cat="all"]').classList.add('active');
-    renderStore(); document.querySelector('.product-section').scrollIntoView({behavior:'smooth'});
+    callAdminMcpTool("add_product", { name: pName, category: pCat, price: price }, btn, agentId, (resInfo) => {
+        let imgPath = 'assets/images/products/fridge.png';
+        if((pName||'').includes('코드제로') || (pName||'').includes('청소기')) imgPath = 'assets/images/products/vacuum.jpg';
+        if((pName||'').includes('디오스') || (pName||'').includes('매직스페이스')) imgPath = 'assets/images/products/instaview_real.png';
+        if((pName||'').includes('OLED') || (pName||'').includes('TV')) imgPath = 'assets/images/products/oled_tv_real.png';
+        
+        const newItem = { id:'prod_'+Date.now(), cat:pCat, name:pName, model:'NEW-2026', price:price, img:imgPath, desc:'LG의 최신 혁신 기술이 적용된 프리미엄 모델입니다.', isNew:true };
+        products.unshift(newItem);
+        addMsg(`✅ <b>신제품 등록 시스템 동기화 완료!</b><br>🛍️ ${pName}<br><span style="color:#10b981">${resInfo.message}</span><br>스토어 프론트엔드에도 즉시 노출되었습니다.`, false, agentId);
+        activeFilter='all'; document.querySelectorAll('.gnb-link').forEach(l=>l.classList.remove('active'));
+        document.querySelector('[data-cat="all"]').classList.add('active');
+        renderStore(); document.querySelector('.product-section').scrollIntoView({behavior:'smooth'});
+    });
 };
 
 // ==================== COUNTRY ROLLOUT ====================
@@ -1160,11 +1161,65 @@ if(resizer && adminPane) {
     });
 }
 
+// ==================== 백엔드 통신(Admin MCP) 브리지 로직 ====================
+async function callAdminMcpTool(toolName, toolArgs, btn, agentId, onSuccessCallback) {
+    const parentContainer = btn.parentElement.parentElement;
+    const originalContent = parentContainer.innerHTML;
+    
+    // 로딩 UI 변경
+    parentContainer.innerHTML = '<span style="color:#f59e0b;font-weight:700"><i class="fa-solid fa-circle-notch fa-spin"></i> 백엔드 Admin 동기화 중...</span>';
+    
+    try {
+        const msgId = "req_" + Date.now();
+        // 1. SSE 이벤트 소스 잠시 개방
+        const sse = new EventSource("http://localhost:3001/sse");
+        
+        const responsePromise = new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => { sse.close(); reject(new Error("Timeout waiting for Shopify response")); }, 25000);
+            sse.addEventListener("message", (e) => {
+                if (e.data.includes(msgId)) { // 간이 매칭
+                    clearTimeout(timeout); sse.close();
+                    try { resolve(JSON.parse(e.data)); } catch(err) { resolve({}); }
+                }
+            });
+            sse.onerror = () => { clearTimeout(timeout); sse.close(); reject(new Error("SSE Backend Connection Error. Admin 서버가 켜져있는지 확인하세요.")); };
+        });
+
+        // 기다렸다가 POST
+        await new Promise(r => { sse.onopen = r });
+        const postRes = await fetch("http://localhost:3001/message", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ jsonrpc: "2.0", id: msgId, method: "tools/call", params: { name: toolName, arguments: toolArgs } })
+        });
+        if (!postRes.ok) throw new Error("Failed to post message to /message");
+
+        const mcpResult = await responsePromise;
+        if (mcpResult.error) throw new Error(mcpResult.error.message);
+        
+        let resultInfo = {};
+        if (mcpResult.result && mcpResult.result.content && mcpResult.result.content[0]) {
+            try { resultInfo = JSON.parse(mcpResult.result.content[0].text); } 
+            catch(ex) { resultInfo = { status: "success", message: mcpResult.result.content[0].text }; }
+        }
+        if (resultInfo.status === "error") throw new Error(resultInfo.message);
+
+        // 성공 UI 업데이트
+        parentContainer.innerHTML = `<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 성공 (Shopify Live 연동 됨)</span>`;
+        if (onSuccessCallback) onSuccessCallback(resultInfo);
+
+    } catch (e) {
+        console.error("MCP Tool Backend Error:", e);
+        parentContainer.innerHTML = originalContent; // 실패시 화면 복구
+        addMsg(`❌ <b>백엔드 서버 명령 전송 실패:</b> ${e.message}`, false, agentId);
+    }
+}
+
 // ==================== INIT ====================
 
 window.execUpdateInventory = function(target, qty, btn, agentId) {
-    btn.parentElement.parentElement.innerHTML='<span style="color:#10b981;font-weight:700"><i class="fa-solid fa-check-circle"></i> 재고 업데이트 완료</span>';
-    addMsg(`🚚 <b>재고 업데이트 완료!</b><br>대상: ${target === 'all' ? '전체 상품' : target}<br>반영 수량: ${qty}개<br>글로벌 배송 창고(GDC) 및 쇼피파이 DB에 연동되었습니다.`, false, agentId);
+    callAdminMcpTool("update_inventory", { sku: target, quantity: qty }, btn, agentId, (resInfo) => {
+        addMsg(`🚚 <b>재고 업데이트(Shopify) 성공!</b><br>대상: ${target === 'all' ? '전체 상품' : target}<br>반영 수량: ${qty}개<br><span style="color:#10b981">${resInfo.message}</span>`, false, agentId);
+    });
 };
 
 renderStore();
