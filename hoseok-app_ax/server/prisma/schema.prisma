@@ -1,0 +1,220 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ProductTranslation {
+  id          Int     @id @default(autoincrement())
+  product_id  BigInt
+  language    String
+  name        String
+  description String?
+  product     product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@unique([product_id, language])
+}
+
+model OrderStatusHistory {
+  id        Int      @id @default(autoincrement())
+  order_id  BigInt
+  oldStatus String?
+  newStatus String
+  changedBy String   @default("SYSTEM")
+  createdAt DateTime @default(now())
+  orders    orders   @relation(fields: [order_id], references: [id], onDelete: Cascade)
+}
+
+model admin_users {
+  id         BigInt   @id @default(autoincrement())
+  username   String   @unique @db.VarChar(255)
+  password   String   @db.VarChar(255)
+  role       String   @default("SUB_ADMIN") @db.VarChar(50)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  website    String?  @db.VarChar(50)
+}
+
+model category {
+  category_id BigInt   @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  website_id  String   @db.VarChar(50)
+  parent_id   BigInt?
+  depth       Int
+  slug        String   @db.VarChar(255)
+  sort_order  Int      @default(0)
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  updated_at  DateTime @default(now()) @db.Timestamp(6)
+  created_by  String   @default("SYSTEM") @db.VarChar(255)
+  updated_by  String   @default("SYSTEM") @db.VarChar(255)
+
+  @@unique([website_id, slug], map: "category_website_slug")
+}
+
+model master_category {
+  category_id    BigInt           @id @default(autoincrement())
+  name           String           @db.VarChar(255)
+  parent_id      BigInt?
+  depth          Int
+  slug           String           @unique @db.VarChar(255)
+  sort_order     Int              @default(0)
+  created_at     DateTime         @default(now()) @db.Timestamp(6)
+  updated_at     DateTime         @default(now()) @db.Timestamp(6)
+  created_by     String           @default("SYSTEM") @db.VarChar(255)
+  updated_by     String           @default("SYSTEM") @db.VarChar(255)
+  master_product master_product[]
+}
+
+model master_product {
+  id              BigInt          @id @default(autoincrement())
+  name            String
+  sku             String          @unique @db.VarChar(255)
+  category_id     BigInt          @default(1)
+  image_url       String?
+  price           Decimal         @db.Decimal(19, 2)
+  original_price  Decimal?        @db.Decimal(19, 2)
+  created_at      DateTime        @default(now()) @db.Timestamp(6)
+  updated_at      DateTime        @default(now()) @db.Timestamp(6)
+  created_by      String          @default("SYSTEM") @db.VarChar(255)
+  updated_by      String          @default("SYSTEM") @db.VarChar(255)
+  status          String          @default("ACTIVE") @db.VarChar(50)
+  description     String?
+  master_category master_category @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_master_product_category")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model member_addresses {
+  country_code   String    @db.VarChar(2)
+  is_default     Boolean
+  created_at     DateTime  @default(now()) @db.Timestamp(6)
+  id             BigInt    @id @default(autoincrement())
+  member_id      BigInt
+  updated_at     DateTime? @db.Timestamp(6)
+  address_type   String    @db.VarChar(20)
+  zip_code       String    @db.VarChar(20)
+  phone_number   String?   @db.VarChar(50)
+  city           String    @db.VarChar(100)
+  recipient_name String    @db.VarChar(100)
+  state          String?   @db.VarChar(100)
+  address_line1  String    @db.VarChar(255)
+  address_line2  String?   @db.VarChar(255)
+  address_line3  String?   @db.VarChar(255)
+  email          String?   @db.VarChar(255)
+  members        members   @relation(fields: [member_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkijf5s4glfq6hc5n42fr4tx3x4")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model members {
+  date_of_birth    DateTime?          @db.Date
+  created_at       DateTime           @default(now()) @db.Timestamp(6)
+  id               BigInt             @id @default(autoincrement())
+  updated_at       DateTime?          @db.Timestamp(6)
+  website_id       String?            @db.VarChar(50)
+  first_name       String?            @db.VarChar(100)
+  last_name        String?            @db.VarChar(100)
+  customer_group   String?            @default("GENERAL") @db.VarChar(255)
+  email            String             @unique @db.VarChar(255)
+  password_hash    String             @db.VarChar(255)
+  phone_number     String?            @db.VarChar(255)
+  status           String             @db.VarChar(255)
+  tax_id           String?            @db.VarChar(255)
+  member_addresses member_addresses[]
+  orders           orders[]
+}
+
+model order_addresses {
+  id             BigInt    @id @default(autoincrement())
+  order_id       BigInt
+  address_type   String    @db.VarChar(20)
+  recipient_name String    @db.VarChar(100)
+  email          String?   @db.VarChar(255)
+  phone_number   String?   @db.VarChar(50)
+  address_line1  String    @db.VarChar(255)
+  address_line2  String?   @db.VarChar(255)
+  address_line3  String?   @db.VarChar(255)
+  city           String    @db.VarChar(100)
+  state          String?   @db.VarChar(100)
+  zip_code       String    @db.VarChar(20)
+  country_code   String    @db.VarChar(2)
+  created_at     DateTime  @default(now()) @db.Timestamp(6)
+  updated_at     DateTime? @db.Timestamp(6)
+  orders         orders    @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model order_items {
+  id           BigInt   @id @default(autoincrement())
+  created_at   DateTime @default(now()) @db.Timestamp(6)
+  created_by   String   @default("SYSTEM") @db.VarChar(255)
+  updated_at   DateTime @default(now()) @db.Timestamp(6)
+  updated_by   String   @default("SYSTEM") @db.VarChar(255)
+  product_id   BigInt
+  product_name String   @db.VarChar(255)
+  quantity     Int
+  unit_price   Decimal  @db.Decimal(38, 2)
+  order_id     BigInt
+  status       String?
+  orders       orders   @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  product      product  @relation(fields: [product_id], references: [id], onDelete: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model orders {
+  id                 BigInt               @id @default(autoincrement())
+  created_at         DateTime             @default(now()) @db.Timestamp(6)
+  created_by         String               @default("SYSTEM") @db.VarChar(255)
+  updated_at         DateTime             @default(now()) @db.Timestamp(6)
+  updated_by         String               @default("SYSTEM") @db.VarChar(255)
+  website_id         String               @db.VarChar(50)
+  currency           String               @default("KRW") @db.VarChar(3)
+  member_id          BigInt               @default(1)
+  order_number       String               @unique @db.VarChar(255)
+  status             String               @db.VarChar(255)
+  total_amount       Decimal              @db.Decimal(38, 2)
+  customer           String?
+  customerEmail      String?
+  customerPhone      String?
+  notes              String?
+  paymentMethod      String?
+  OrderStatusHistory OrderStatusHistory[]
+  order_addresses    order_addresses[]
+  order_items        order_items[]
+  members            members              @relation(fields: [member_id], references: [id], onUpdate: NoAction)
+  website            website              @relation(fields: [website_id], references: [website_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model product {
+  id                 BigInt               @id @default(autoincrement())
+  name               String
+  sku                String               @unique @db.VarChar(255)
+  category_id        BigInt               @default(1)
+  website_id         String               @db.VarChar(50)
+  image_url          String?
+  stock_quantity     Int                  @default(0)
+  is_discounted      Boolean              @default(false)
+  price              Decimal              @db.Decimal(19, 2)
+  original_price     Decimal?             @db.Decimal(19, 2)
+  created_at         DateTime             @default(now()) @db.Timestamp(6)
+  updated_at         DateTime             @default(now()) @db.Timestamp(6)
+  created_by         String               @default("SYSTEM") @db.VarChar(255)
+  updated_by         String               @default("SYSTEM") @db.VarChar(255)
+  status             String               @default("ACTIVE") @db.VarChar(50)
+  description        String?
+  ProductTranslation ProductTranslation[]
+  order_items        order_items[]
+  website            website              @relation(fields: [website_id], references: [website_id])
+}
+
+model website {
+  website_id      String    @id @db.VarChar(50)
+  country         String    @db.VarChar(255)
+  subsidiary_code String    @db.VarChar(50)
+  locale_code     String    @db.VarChar(50)
+  created_at      DateTime  @default(now()) @db.Timestamp(6)
+  updated_at      DateTime  @default(now()) @db.Timestamp(6)
+  created_by      String    @default("SYSTEM") @db.VarChar(255)
+  updated_by      String    @default("SYSTEM") @db.VarChar(255)
+  orders          orders[]
+  product         product[]
+}

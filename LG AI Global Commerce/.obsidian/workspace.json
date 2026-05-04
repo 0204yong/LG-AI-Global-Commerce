@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "UI_Component_3D_Widget.md",
+                "file": "AI_Agent_Orchestration.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "UI_Component_3D_Widget"
+              "title": "AI_Agent_Orchestration"
             }
           }
         ]
@@ -185,21 +185,31 @@
   },
   "active": "4b1321399ea15e31",
   "lastOpenFiles": [
-    "Project_Architecture.md",
-    "Main_Dashboard.md",
-    "AI_Agent_Orchestration.md",
-    "UI_Component_3D_Widget.md",
+    "assets/images/agents/site_agent.png",
+    "assets/images/agents/promo_agent.png",
+    "assets/images/agents/product_agent_v6.png",
+    "assets/images/agents/product_agent_v4.png",
+    "assets/images/agents/product_agent_v2.png",
+    "assets/images/agents/md_agent_v6.png",
+    "assets/images/agents/md_agent_v2.png",
+    "assets/images/agents/md_agent.png",
     "assets/images/agents/marketing_agent.png",
     "assets/images/agents/atlas_agent.png",
-    "node_modules/@hono/node-server/README.md",
-    "icons/icon-512.png",
     "icons/icon-192.png",
-    "assets/images/agents/md_agent.png",
-    "assets/images/agents/md_agent_v4.png",
-    "assets/images/agents/md_agent_v2.png",
-    "assets/images/agents/md_agent_v6.png",
-    "assets/images/agents/price_agent.png",
-    "assets/images/agents/site_agent.png",
+    "node_modules/@hono/node-server/README.md",
+    "Agent_Architecture_Review.md",
+    "AI_Agent_Orchestration.md",
+    "Autonomous_Zero_Click_Scenario.md",
+    "AX_Hackathon_Plan.md",
+    "CLOi_Development_Log.md",
+    "Git_Changelog.md",
+    "Main_Dashboard.md",
+    "Team_API_Map.md",
+    "Project_Architecture.md",
+    "Security_Guardian_Log.md",
+    "Security_Agent_Production_Architecture.md",
+    "Security_Agent_Next_Steps.md",
+    "UI_Component_3D_Widget.md",
     "docker_mcp_architecture.md",
     "node_modules/express-rate-limit/license.md",
     "node_modules/unpipe/HISTORY.md"

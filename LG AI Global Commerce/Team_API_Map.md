@@ -7,13 +7,13 @@
 
 ## 서비스 포트 맵
 
-| 서비스 | 포트 | 담당 | DB |
-|--------|------|------|-----|
-| **catalog-service** | `:8080` | 손정보 | Neon PostgreSQL (공유) |
-| **order-service** | `:8081` | 손정보 | Neon PostgreSQL (공유) |
-| **member-service** | `:8082` | 손정보 | Neon PostgreSQL (공유) |
+| 서비스                   | 포트      | 담당      | DB                   |
+| --------------------- | ------- | ------- | -------------------- |
+| **catalog-service**   | `:8080` | 손정보     | Neon PostgreSQL (공유) |
+| **order-service**     | `:8081` | 손정보     | Neon PostgreSQL (공유) |
+| **member-service**    | `:8082` | 손정보     | Neon PostgreSQL (공유) |
 | **promotion-service** | `:8083` | 손정보/노은정 | Neon PostgreSQL (공유) |
-| **app_ax (어드민)** | `:3000` | 이호석 | **SQLite** (Prisma) |
+| **app_ax (어드민)**      | `:3000` | 이호석     | Neon PostgreSQL (공유) |
 
 ## 🔗 CLOi 3단계 백엔드 체인
 
@@ -57,19 +57,20 @@
 
 ## 이호석 Express API (`localhost:3000`)
 
-| Method | Endpoint | 설명 |
-|--------|----------|------|
-| `GET` | `/api/products?storeId=KR` | 상품 목록 (스토어별) |
-| `POST` | `/api/products` | 상품 등록 |
-| `GET` | `/api/orders` | 전체 주문 (pagination) |
-| `GET` | `/api/orders/{id}` | 주문 상세 + 상태이력 |
-| `POST` | `/api/orders` | 주문 생성 (재고 차감 트랜잭션) |
-| `PATCH` | `/api/orders/{id}/status` | 상태 변경 (취소/반품 시 재고 복구) |
-| `POST` | `/api/orders/seed` | 데모 주문 5건 생성 |
-| `GET` | `/api/dashboard` | 대시보드 통계 |
-| `POST` | `/api/agent` | AI Agent 연동 |
+| Method  | Endpoint                   | 설명                    |
+| ------- | -------------------------- | --------------------- |
+| `GET`   | `/api/products?storeId=KR` | 상품 목록 (스토어별)          |
+| `POST`  | `/api/products`            | 상품 등록                 |
+| `GET`   | `/api/orders`              | 전체 주문 (pagination)    |
+| `GET`   | `/api/orders/{id}`         | 주문 상세 + 상태이력          |
+| `POST`  | `/api/orders`              | 주문 생성 (재고 차감 트랜잭션)    |
+| `PATCH` | `/api/orders/{id}/status`  | 상태 변경 (취소/반품 시 재고 복구) |
+| `POST`  | `/api/orders/seed`         | 데모 주문 5건 생성           |
+| `GET`   | `/api/dashboard`           | 대시보드 통계               |
+| `POST`  | `/api/agent`               | AI Agent 연동           |
 
-### 이호석 DB 스키마 (Prisma/SQLite)
+### 이호석 DB 스키마 (Prisma/Neon DB 통합 완료)
+- ✅ **DB 통합**: 2026-05-04부로 SQLite에서 팀 공용 Neon DB로 마이그레이션 완료 (db pull 사용)
 - **Store**: KR, US (글로벌 롬아웃 지원)
 - **Product**: 상품코드, 가격, 재고, 다국어 번역(ProductTranslation)
 - **Order**: 주문번호, 고객정보, 결제방법, 상태이력(OrderStatusHistory)

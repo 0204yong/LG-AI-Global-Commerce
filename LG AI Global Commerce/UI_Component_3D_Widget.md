@@ -60,13 +60,13 @@ lg-ai-commerce-msa/
 
 ## 4. 팀 협업 안내
 
-| 항목 | 내용 |
-|------|------|
-| **리포지토리** | `https://github.com/Jeongbo/lg-ai-commerce.git` |
-| **브랜치** | `master` |
-| **최신 커밋** | `eb69087` — `feat: CLOi 3D 로봇 위젯 및 Atlas CS 위젯 추가` |
+| 항목         | 내용                                                        |
+| ---------- | --------------------------------------------------------- |
+| **리포지토리**  | `https://github.com/Jeongbo/lg-ai-commerce.git`           |
+| **브랜치**    | `master`                                                  |
+| **최신 커밋**  | `eb69087` — `feat: CLOi 3D 로봇 위젯 및 Atlas CS 위젯 추가`        |
 | **클론 명령어** | `git clone https://github.com/Jeongbo/lg-ai-commerce.git` |
-| **로컬 실행** | `npm install` → `npm run dev` |
+| **로컬 실행**  | `npm install` → `npm run dev`                             |
 
 > [!IMPORTANT]
 > 팀원들은 위 리포를 clone하여 최신 커밋 기준으로 각자 브랜치를 따서 작업할 수 있습니다.
