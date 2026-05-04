@@ -5,8 +5,8 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 interface OrderItem {
   id: number;
-  productName: string;
-  price: number;
+  product_name: string;
+  unit_price: number;
   quantity: number;
   status: string;
 }
@@ -272,7 +272,7 @@ export default function OrderManage() {
                           ) : null}
                           {o.order_items?.map((item: any) => (
                             <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <span style={{ color: 'var(--text-muted)', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>- {item.productName}</span>
+                              <span style={{ color: 'var(--text-muted)', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>- {item.product_name}</span>
                               <span style={{ fontSize: '0.7rem', padding: '1px 4px', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--border)', fontWeight: 'bold', color: 'var(--accent)' }}>
                                 {item.status === 'PREP_SHIPPING' ? '배송준비' : 
                                  item.status === 'PICKING' ? '피킹중' : 

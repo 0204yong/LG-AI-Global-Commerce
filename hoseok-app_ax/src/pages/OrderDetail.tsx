@@ -4,8 +4,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 interface OrderItem {
   id: number;
   productId?: number;
-  productName: string;
-  price: number;
+  product_name: string;
+  unit_price: number;
   quantity: number;
   status: string;
 }
@@ -254,7 +254,7 @@ export default function OrderDetail() {
                 order.order_items.map((item, idx) => (
                   <tr key={item.id || idx} style={{ borderBottom: '1px solid var(--border)' }}>
                     <td style={{ padding: '1rem' }}>
-                      <div style={{ fontWeight: 'bold' }}>{item.productName}</div>
+                      <div style={{ fontWeight: 'bold' }}>{item.product_name}</div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                         코드: {item.productId ? `PRD-${item.productId.toString().padStart(4, '0')}` : 'N/A'}
                       </div>
@@ -274,7 +274,7 @@ export default function OrderDetail() {
                         <option value="RETURNED">반품</option>
                       </select>
                     </td>
-                    <td style={{ padding: '1rem', textAlign: 'right' }}>₩{item.price.toLocaleString()}</td>
+                    <td style={{ padding: '1rem', textAlign: 'right' }}>₩{item.unit_price.toLocaleString()}</td>
                     <td style={{ padding: '1rem', textAlign: 'center' }}>
                       <div style={{ display: 'inline-block', textAlign: 'left' }}>
                         Ordered: <strong>{item.quantity}</strong><br/>
@@ -282,7 +282,7 @@ export default function OrderDetail() {
                       </div>
                     </td>
                     <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 'bold' }}>
-                      ₩{(item.price * item.quantity).toLocaleString()}
+                      ₩{(item.unit_price * item.quantity).toLocaleString()}
                     </td>
                   </tr>
                 ))
