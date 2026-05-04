@@ -25,6 +25,7 @@
 4. **Git 변경 이력**
    * 📎 [[Git_Changelog]] : 주요 커밋 타임라인 및 버전별 변경 내역
 5. **작업 로그 (최신)**
+   * 📎 **2026-05-04 작업**: GitHub Pages 배포 실패(pages build and deployment) 오류 해결을 위해 프로젝트 루트에 `.nojekyll` 파일 추가 (Jekyll 빌드 우회)
    * 📎 **2026-05-02 작업**: `lg-ai-commerce-msa` 로컬 개발 서버 시작 완료 (`http://localhost:4321/`)
    * 📎 **2026-05-02 작업**: 어드민 사이트(`hoseok-app_ax`) 로컬 개발 서버 시작 완료 (`http://localhost:5173/`)
    * 📎 **2026-05-02 작업**: 어드민 사이트 백엔드 API 서버(`hoseok-app_ax/server`) 시작 완료 (`http://localhost:3000/`)
