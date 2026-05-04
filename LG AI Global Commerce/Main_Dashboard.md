@@ -25,6 +25,7 @@
 4. **Git 변경 이력**
    * 📎 [[Git_Changelog]] : 주요 커밋 타임라인 및 버전별 변경 내역
 5. **작업 로그 (최신)**
+   * 📎 **2026-05-04 작업**: Cloudflare Pages 배포 실패 근본 원인 분석 및 해결 완료. Astro 빌드 시 생성되는 Workers 전용 키(`main`, `rules`, `images`, `previews`, `ASSETS`)를 자동 제거하는 CI 스텝 추가 → **라이브 사이트 정상 가동: https://lg-ai-commerce.pages.dev**
    * 📎 **2026-05-04 작업**: 어드민 사이트 프론트엔드(`OrderManage`, `OrderDetail`)에서 Neon DB 마이그레이션 이후 누락되었던 스키마 매핑 오류(`product_name`, `unit_price`) 수정
    * 📎 **2026-05-04 작업**: 팀 협업 효율성 극대화를 위해 분산된 어드민(`app_ax`), 메인 쇼핑몰(`lg-ai-commerce-msa`), 백엔드 서비스들을 `AI-Demo` 단일 메인 저장소로 통합 완료 (Monorepo 구축)
    * 📎 **2026-05-04 작업**: 어드민 대시보드 내 'Live Store Preview'를 로컬호스트(`localhost:4321`)로 연결하여, 팀원들이 Pull 후 로컬 구동 시 최신 UI(CLOi 위젯, 비디오 배너 등)를 Cloudflare 배포 오류와 무관하게 즉각 확인할 수 있도록 조치
