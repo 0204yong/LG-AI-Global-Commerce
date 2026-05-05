@@ -14,6 +14,10 @@
 8. **기능별 솔루션 스택 제안**
    * 📎 [[Solution_Toolchain_Proposal]] : 프론트엔드, 백엔드, AI 인프라 등 생산성 극대화를 위한 도구(Lovable 등) 활용 방안 제안
 
+## 🖥️ PC 이관 (회사 PC 연속 작업)
+- 📎 [[PC_Migration_Guide]] : 회사 PC로 프로젝트 이관 종합 가이드
+- 📎 [[PC_Migration_Checklist]] : 이관 작업 체크리스트
+
 ## 문서 디렉토리
 
 1. **시스템 구조 및 배포 환경**
